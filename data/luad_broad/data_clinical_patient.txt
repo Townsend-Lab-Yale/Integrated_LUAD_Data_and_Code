@@ -1,0 +1,188 @@
+#Patient Identifier	Sex	Diagnosis Age	Ethnicity Category	Smoker	Person Cigarette Smoking History Pack Year Value	Stage	Progress Free Survival (Months)
+#Identifier to uniquely specify a patient.	Sex	Age at which a condition or disease was first diagnosed.	The text for reporting information about ethnicity.	Indicates if person is a smoker.	Numeric computed value to represent lifetime tobacco exposure defined as number of cigarettes smoked per day x number of years smoked divided by 20.	Stage	Progress Free Survival (Months)
+#STRING	STRING	NUMBER	STRING	STRING	NUMBER	STRING	NUMBER
+#1	1	1	1	1	1	1	1
+PATIENT_ID	SEX	AGE	ETHNICITY	SMOKER	SMOKING_PACK_YEARS	STAGE	PFS_MONTHS
+LU-A08-43	Male	43		Never Smoker	0	IV	
+LUAD-D02326	Female	49	European	Never Smoker	0	IIA	5.17
+LUAD-S01341	Female	64	European	Heavy Smoker	11	IIIA	8
+LUAD-U6SJ7	Male	78	European	Heavy Smoker	21	IA	
+LUAD-E01014	Female	60	European	Light Smoker	8	IIIA	4.03
+LUAD-S01404	Male	55	European	Heavy Smoker	78	IIIA	10
+LUAD-S01381	Male	61	European	Heavy Smoker	60	IB	0
+LUAD-QY22Z	Male	56	European	Heavy Smoker	78	IB	
+LUAD-AEIUF	Female	60	European	Heavy Smoker	73.5		
+LUAD-FH5PJ	Male	75	European	Heavy Smoker	55	IB	
+LUAD-E01317	Female		European				4.1
+LUAD-2GUGK	Female	68	European	Heavy Smoker	30	IIA	
+LUAD-S01331	Male	72	European	Heavy Smoker	30	IIIA	13
+LUAD-E01278	Female		European	Heavy Smoker	30	IIA	2.8
+LUAD-S01467	Male	60	European	Heavy Smoker	113	IB	9
+LUAD-S01405	Male	74	European	Heavy Smoker	34	IIA	10
+LUAD-S01356	Male	80	European	Heavy Smoker	22	IB	21
+LUAD-S01346	Male	69	European	Heavy Smoker	40	IIB	12
+LUAD-S01345	Male	74	European	Heavy Smoker	13	IB	21
+LUAD-S00488	Male	72	European	Heavy Smoker	106	IIIA	0
+LUAD-S01478	Male	63	European	Heavy Smoker	44	IB	0
+LUAD-E00934	Male	58	European	Heavy Smoker	28	IB	4.83
+LUAD-S01302	Male	64	European	Heavy Smoker	128	IB	0
+LUAD-5V8LT	Male	52	Asian	Light Smoker	6	IB	
+LUAD-NYU346	Female	74	European	Heavy Smoker	25	IA	56.03
+LUAD-NYU279	Female	62	Asian	Never Smoker	0	IA	58.37
+LUAD-NYU605	Female	61	European	Heavy Smoker	40	IB	7.47
+LUAD-NYU1128	Female	55	European	Never Smoker	0	IA	17.8
+LUAD-NYU129	Male	60	European	Heavy Smoker	25	IA	24.3
+LUAD-NYU735	Female	57	European	Heavy Smoker	37.5	IA	42.13
+LUAD-NYU994	Male	81	European	Heavy Smoker	20	IA	25.7
+LUAD-NYU1124	Female	80	European	Never Smoker	0	IB	18.27
+LUAD-NYU287	Male	72	Asian	Heavy Smoker	60	IIB	4.2
+LUAD-NYU846	Female	78	Asian	Never Smoker	0	IIA	35.53
+LUAD-NYU689	Female	70	European	Light Smoker	5	IA	42.3
+LUAD-NYU796	Male	72	European	Never Smoker	0	IA	38.77
+LUAD-NYU848	Female	65	European	Never Smoker	0	IA	34.13
+LUAD-NYU1027	Female	82	European	Never Smoker	0	IB	23.9
+LUAD-NYU213	Male	79	European	Heavy Smoker	25	IIA	15.47
+LUAD-NYU252	Female	70	European	Light Smoker	10	IB	59.77
+LUAD-NYU574S	Female	80	European	Never Smoker	0	IA	18.57
+LUAD-NYU803	Female	83	European	Never Smoker	0	IA	18.2
+LUAD-NYU1093	Male	61		Never Smoker	0	IA	20.83
+LUAD_E01319	Female		European	Light Smoker	2	IB	1.33
+LUAD-E00163	Female	54	European	Never Smoker	0	IA	6.3
+LUAD-S01320	Female	62	European	Never Smoker	0	IB	15
+LUAD-5O6B5	Female	56	Asian	Never Smoker	0	IB	
+LUAD-B01102	Male	61	European	Never Smoker	0	IIIA	7.07
+LUAD-RT-S01771	Male	48	European	Heavy Smoker	58	IIIB	
+LUAD-RT-S01770	Female	78	European	Never Smoker	0	IIIB	
+LUAD-NYU1177	Female	87	European	Never Smoker	0	IA	15.43
+LUAD-GU4I3	Female	57	European			IB	
+LUAD-NYU704	Female	55	European	Light Smoker	10	IB	43.53
+LUAD-NYU802	Female	44	Asian	Heavy Smoker	28	IB	21.23
+LUAD-NYU608	Male	64	European	Heavy Smoker	20	IA	33.1
+LUAD-NYU1142	Male	72	African	Never Smoker	0	IA	
+LUAD-NYU947	Female	58	European	Never Smoker	0	IB	28.77
+LUAD_E00703	Female	70	European	Heavy Smoker	25	IB	2.1
+LUAD_E00945	Female	68	European	Heavy Smoker	23	IA	4.2
+LUAD-NYU1195	Male	63	European	Heavy Smoker	70	IV	9.07
+LUAD-S01373	Male	53	European	Heavy Smoker	53	IIIA	0
+LUAD-NYU1026	Female	76	European	Heavy Smoker	30	IB	24.13
+LUAD-D00147	Female	74	European	Light Smoker	3	IB	9.17
+LUAD-S01362	Female	78	European	Never Smoker	0	IIIA	18
+LUAD-RT-S01856	Female		European				
+LUAD-NYU1210	Male	68	European	Light Smoker	0.1	IA	14.13
+LUAD-RT-S01808	Male		European	Heavy Smoker	18		
+LUAD_E01419	Female	51	European	Light Smoker	10	IA	1.8
+LUAD-S00499	Female	72	European	Never Smoker	0	IIIA	0
+LUAD-F00134	Male	87	European	Never Smoker	0		7.5
+LUAD-NYU739	Female	72	European	Heavy Smoker	20	IA	41.83
+LUAD-NYU584S	Female	59	European	Heavy Smoker	40	IA	23.83
+LUAD-NYU1096	Female	58	European	Light Smoker	10	IIA	20.63
+LUAD-UF7HM	Female	72	Asian	Never Smoker	0	IIB	
+LUAD-CHTN-4090680	Male	72	European				
+LUAD-F00170	Male	76	European			IIA	6.87
+LUAD-QJN9L	Male	81	European	Heavy Smoker	50	IIB	
+LUAD-NYU508	Female	65	European	Heavy Smoker	25	IIB	51.2
+LUAD-CHTN-MAD04-00674	Female	77	European				
+LUAD-NYU282	Male	62	European	Heavy Smoker	60	IB	48.7
+LUAD-RT-S01832	Female		European	Heavy Smoker	35		
+LUAD-CHTN-MAD06-00490	Female	36	European				
+LUAD-RT-S01852	Male		European	Heavy Smoker	28		
+LUAD-RT-S01866	Male		European	Heavy Smoker	51		
+LUAD-S01304	Male	75	European	Heavy Smoker	92	IIB	16
+LUAD_E01086	Female	68	European	Heavy Smoker	24	IIA	3.77
+LUAD-NYU696	Female	57	European	Light Smoker	6	IB	37.5
+LUAD-NYU330	Female	70	European	Heavy Smoker	75	IB	32.83
+LUAD-NYU1101	Female	72	European	Heavy Smoker	15	IV	19.7
+LUAD-NYU627	Female	67	European	Heavy Smoker	60	IA	31.23
+LUAD-RT-S01840	Male		European	Heavy Smoker	111		
+LUAD-S01482	Female	48	European	Heavy Smoker	61	IB	8
+LUAD-RT-S01711	Male	63	European	Heavy Smoker	86	IA	7
+LUAD_E01166	Female		European	Heavy Smoker	30	IB	1.17
+LUAD-B02477	Male	77	European	Heavy Smoker	35	IIIA	3.77
+LUAD-TLLGS	Male	72	European	Heavy Smoker	75	IA	
+LUAD-D01278	Male	60	European			IIB	7.17
+LUAD-RT-S01487	Male	68	European	Heavy Smoker	45	IB	8
+LUAD-RT-S01810	Male		European	Heavy Smoker	64		
+LUAD-S01354	Female	49	European	Heavy Smoker	26	IA	17
+LUAD-CHTN-MAD08-00104	Male	74	European				
+LUAD-QCHM7	Male	42	Asian	Light Smoker	5.25	IB	
+LUAD-CHTN-3090416	Male	73	European				
+LUAD-NYU575	Female	61	European	Never Smoker	0	IIA	21.27
+LUAD-NYU195	Male	57	Asian	Never Smoker	0	IIA	63.27
+LUAD-B01169	Male	60	European			IIA	1.13
+LUAD-RT-S01703	Male	54	European	Heavy Smoker	30	IA	5
+LUAD-NYU315	Female	83	European	Heavy Smoker	60	IIA	
+LUAD-S00486	Male	74	European	Heavy Smoker	43	IIIA	0
+LUAD-D01382	Male	68	European	Heavy Smoker	60	IB	1.83
+LUAD-RT-S01700	Female	38	European	Heavy Smoker	17	IA	6
+LUAD-NYU263	Female	56	European	Heavy Smoker	40	IA	6.7
+LUAD-F00057	Male	81	European	Heavy Smoker	30	IB	5.57
+LUAD-NYU1021	Female	48	European	Heavy Smoker	30	IV	24.3
+LUAD-RT-S01709	Female	65	European	Heavy Smoker	54	IV	
+LUAD-D01751	Female	50	European	Heavy Smoker	22	IB	5.93
+LUAD-CHTN-3090415	Male	56	European				
+LUAD-NYU201	Male	84	European	Heavy Smoker	70	IB	61.87
+LUAD-NYU184	Male	77	European	Heavy Smoker	60	IA	8.63
+LUAD-B01145	Male	70	European	Heavy Smoker	30	IIIA	6.07
+LUAD_E01147	Male	72	European	Heavy Smoker	55	IA	5.5
+LUAD-NYU160	Female	80	European	Heavy Smoker	60	IA	10.67
+LUAD-F00257	Female	68	European	Heavy Smoker	40	IA	2.17
+LUAD-B02077	Male	65	European	Heavy Smoker	15	IIB	16.3
+LUAD-D02085	Female	70	European	Heavy Smoker	25	IIA	5.63
+LUAD-F00121	Female	66	European	Heavy Smoker	50	IIA	5.17
+LUAD-B01970	Male	47	European	Light Smoker	10	IIIA	2.7
+LUAD-YKER9	Male	62	European	Heavy Smoker	50	IB	
+LUAD-F00018	Female	52	European	Heavy Smoker	30	IB	6
+LUAD-B02515	Male	73	European	Heavy Smoker	20	IIA	6.93
+LUAD-F00089	Male	72	European	Heavy Smoker	55	IB	6.27
+LUAD-RT-S01831	Male		European	Heavy Smoker	34		
+LUAD_E01047	Male	81	European	Heavy Smoker	70	IIB	4
+LUAD-B00859	Female	53	European	Heavy Smoker	15	IB	8.03
+LUAD-CHTN-MAD06-00678	Male	61	European				
+LUAD-VUMN6	Female	74	African	Heavy Smoker	20	IIB	
+LUAD-RT-S01769	Male	61	European	Heavy Smoker	46	IB	
+LUAD-74TBW	Male	73	European	Heavy Smoker	61.25	IB	
+LUAD-NYU669	Female	65	European	Heavy Smoker	15	IA	32.63
+LUAD-RT-S01477	Male	60	European	Heavy Smoker	90	IIIA	
+LUAD-S00484	Male	45	European	Heavy Smoker	70	IV	22
+LUAD-RT-S01774	Female	55	European	Heavy Smoker	38	IB	
+LUAD-NYU259	Female	79	European	Heavy Smoker	30	IA	22.17
+LUAD-RT-S01818	Male		European	Heavy Smoker	55		
+LUAD-LC15C	Male	43	Asian	Light Smoker	5.5	IA	
+LUAD-RT-S01721	Male	74	European	Heavy Smoker	48	IB	6
+LUAD-S01306	Female	55	European	Heavy Smoker	63	IIB	14
+LUAD-D02185	Female	54	European	Heavy Smoker	30	IIA	5.4
+LUAD-S01413	Female	71	European	Heavy Smoker	49	IIB	10
+LUAD-NYU847	Male	67	European	Heavy Smoker	25	IIB	35.03
+LUAD-B02216	Female	64	European	Heavy Smoker	20	IIA	14.87
+LUAD-CHTN-3090346	Male	78	European				
+LUAD-RT-S01699	Male	51	European	Heavy Smoker	33	IIIA	6
+LUAD-E00443	Male	74	European	Heavy Smoker	35	IB	21.27
+LUAD-E00918	Female	56	European	Heavy Smoker	45	IA	4.97
+LUAD-F00282	Male	63	European			IIA	6.93
+LUAD-B00523	Male	68	European	Heavy Smoker	40	IIIA	13.6
+LUAD-F00365	Male	70	European			IIB	5.8
+LUAD-B00915	Female	67	European	Heavy Smoker	40	IV	0
+LUAD-LIP77	Female	50	European	Heavy Smoker	45	IA	
+LUAD-NYU1051S	Male	78	European	Light Smoker	10	IIIA	24.27
+LUAD-NYU1219	Male	77	European	Heavy Smoker	50	IB	13.83
+LUAD-E00897	Male	58	European	Heavy Smoker	66	IA	3.53
+LUAD-RT-S01813	Female		European	Heavy Smoker	80		
+LUAD-RT-S01702	Female	60	European	Never Smoker	0	IB	5
+LUAD-S01409	Female	69	European	Heavy Smoker	34	IV	10
+LUAD-F00162	Male	80	European	Heavy Smoker	50		8.8
+LUAD-NYU408	Female	71	European	Heavy Smoker	30	IB	16.33
+LUAD-B02594	Female	49	European	Heavy Smoker	33	IIIA	4.6
+LUAD-F00368	Female	82	European				6.33
+LUAD-RT-S01777	Female	62	European	Heavy Smoker	53	IIIB	
+LUAD_E00565	Male	78	European	Heavy Smoker	30	IB	6.73
+LUAD-NYU284	Female	68	European	Heavy Smoker	70	IV	60.07
+LUAD-D01603	Male	52	European			IV	0.13
+LUAD_E00623	Male	70	European	Heavy Smoker	45	IB	5.77
+LUAD-B00416	Female	59	European	Heavy Smoker	40	IIB	9.33
+LUAD-B01811	Male	60	European			IIA	7.43
+LUAD-CHTN-Z4716A	Male	64	European				
+LUAD_E00522	Female	46	European	Light Smoker	10	IB	1.87
+LUAD-S01357	Male	57	European	Heavy Smoker	28	IIB	21
+LUAD-S01315	Male	77	European	Light Smoker	1	IB	15
+LUAD-CHTN-MAD06-00668	Male	72	European				
+LUAD-YINHD	Male	65	European	Heavy Smoker	33.75	IIIB	
