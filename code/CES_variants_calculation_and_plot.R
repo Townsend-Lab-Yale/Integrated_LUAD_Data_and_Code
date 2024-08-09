@@ -18,6 +18,7 @@ library(ggplot2)
 
 location_output <- "../integrated_data/"
 location_data <- "../data/"
+rdata_output <- "./R_Data/"
 ## read maf file
 maf_file <- read.csv(paste0(location_output,"merged_luad_maf.txt"))
 colnames(maf_file)[2] <- 'Tumor_Sample_Barcode'
@@ -89,7 +90,7 @@ genie_panels_used <- fread(paste0(location_data,"genie_9/data_clinical_sample.tx
 ### read in genes included in each panel and creating GRANGES object (bed files)  to pass into covered_regions parameter of load_maf 
 ### once the granges are exported once, these functions don't need to be run anymore
 # gene_granges <- rtracklayer::import(paste0(location_data, "gencode.v38lift37.basic.annotation.gtf"))
-load("gencode.v38lift37.basic.annotation.gtf.Rdata")
+load(paste0(rdata_output, "gencode.v38lift37.basic.annotation.gtf.Rdata"))
 
 location_bed <- paste0(location_data,'bed_files/')
 if(!dir.exists(location_bed)){
@@ -205,8 +206,8 @@ cesa <- load_maf(cesa, maf = TSP_maf, coverage = 'targeted', covered_regions = p
 cesa <- load_maf(cesa, maf = Broad_maf$WGS, coverage = 'genome')
 cesa <- load_maf(cesa, maf = NCI_maf, coverage = 'genome')
 
-save_cesa(cesa,"load_maf_cesa_WES_TGS_WGS.rds")
-save.image()
+save_cesa(cesa,paste0(rdata_output, "load_maf_cesa_WES_TGS_WGS.rds"))
+# save.image()
 
 
 ## calculate mutation rates for all samples, smokers, and never-smokers  ####
@@ -280,12 +281,12 @@ table(cesa_nonsmoking_w_panel$samples[Unique_Patient_Identifier %in% c(nonsmokin
 # exome   genome targeted 
 # 286      192      164
 
-# save_cesa(cesa, "cesa_allSamples.rds")
-# save_cesa(cesa,"cesa_smoking.rds")
-# save_cesa(cesa, "cesa_nonsmoking.rds")
-load_cesa("cesa_allSamples.rds")
-load_cesa("cesa_smoking.rds")
-load_cesa("cesa_nonsmoking.rds")
+# save_cesa(cesa,paste0(rdata_output, "cesa_allSamples.rds"))
+# save_cesa(cesa,paste0(rdata_output, "cesa_smoking.rds"))
+# save_cesa(cesa,paste0(rdata_output, "cesa_nonsmoking.rds"))
+load_cesa(paste0(rdata_output, "cesa_allSamples.rds"))
+load_cesa(paste0(rdata_output, "cesa_smoking.rds"))
+load_cesa(paste0(rdata_output, "cesa_nonsmoking.rds"))
 
 ## ploting cancer effect size ####
 oncogene_variants <- c("KRAS_G12D","KRAS_G12C","BRAF_V600E","EGFR_L858R")

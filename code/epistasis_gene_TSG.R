@@ -149,6 +149,9 @@ head(epi_v3_data2[ces_B_on_A == 0.001000])
 
 epi_v3_data2[, "ci_low_95_ces_B_on_A_new" := ifelse(is.na(ci_low_95_ces_B_on_A) & !is.na(ces_B_on_A) ,ces_B_on_A, ci_low_95_ces_B_on_A)]
 
+save(epi_v3_data2, file = paste0(rdata_output, "epistasis_Oncogene_TSG_output.Rdata"))
+# load(paste0(rdata_output, "epistasis_Oncogene_TSG_output.Rdata"))
+
 ## Visualizing the ces_B_on_A #######
 ## here we use "select" variants (all amino-acid-change mutation and noncoding SNVs are included, so the sample sizes are more powerful than "nonsilent" and "recurrent")
 variants_type_target <- "select" ## "nonsilent"; "recurrent"
@@ -158,7 +161,7 @@ epi_v3_KRAS_S <- epi_v3_data2[.("KRAS","Smo",variants_type_target), on=.(variant
 epi_v3_KRAS_nonS <- epi_v3_data2[.("KRAS","nonSmo",variants_type_target), on=.(variant_A, data_type, variants_type)]
 epi_v3_KRAS <- epi_v3_data2[.("KRAS",variants_type_target), on=.(variant_A, variants_type)]
 epi_v3_KRAS_NA <- epi_v3_KRAS[is.na(ces_B_on_A)]
-nrow(epi_v3_KRAS_NA) ## there are 15个 gene pair have NA ces_B_on_A
+nrow(epi_v3_KRAS_NA) 
 epi_v3_KRAS <- epi_v3_KRAS[!is.na(ces_B_on_A)]
 ## sorting gene by ces_B_on_A of TSG under KRSA_G12C background in smokers, then neversmokers, then all samples 
 variant_order_KRAS <- epi_v3_KRAS_S[ces_B_on_A > 0.001][order(-ces_B_on_A)]$variant_B_s
@@ -220,12 +223,9 @@ p_KRAS <- ggplot(data= epi_v3_KRAS, aes(x= data_type , y = ces_B_on_A))+
   #   hjust = 0.5, vjust = 0.5 ) 
 
 ### for BRAF ####
-# epi_v3_BRAF_all <- epi_v3_data2[.("BRAF","All",variants_type_target), on=.(variant_A, data_type, variants_type)]
-# epi_v3_BRAF_S <- epi_v3_data2[.("BRAF","Smo",variants_type_target), on=.(variant_A, data_type, variants_type)]
-# epi_v3_BRAF_nonS <- epi_v3_data2[.("BRAF","nonSmo",variants_type_target), on=.(variant_A, data_type, variants_type)]
 epi_v3_BRAF <- epi_v3_data2[.("BRAF",variants_type_target), on=.(variant_A, variants_type)]
 epi_v3_BRAF_NA <- epi_v3_BRAF[is.na(ces_B_on_A)]
-nrow(epi_v3_BRAF_NA) ## there are 15个 gene pair have NA ces_B_on_A
+nrow(epi_v3_BRAF_NA) 
 epi_v3_BRAF <- epi_v3_BRAF[!is.na(ces_B_on_A)]
 ## use the gene_order_KRAS
 epi_v3_BRAF[,variant_B_s := factor(variant_B_s, levels = gene_order_KRAS, ordered = T )] 
@@ -268,12 +268,9 @@ p_BRAF <- ggplot(data= epi_v3_BRAF, aes(x= data_type , y = ces_B_on_A))+
 #   hjust = 0.5, vjust = 0.5 ) 
 
 ### for EGFR ####
-# epi_v3_EGFR_all <- epi_v3_data2[.("EGFR","All",variants_type_target), on=.(variant_A, data_type, variants_type)]
-# epi_v3_EGFR_S <- epi_v3_data2[.("EGFR","Smo",variants_type_target), on=.(variant_A, data_type, variants_type)]
-# epi_v3_EGFR_nonS <- epi_v3_data2[.("EGFR","nonSmo",variants_type_target), on=.(variant_A, data_type, variants_type)]
 epi_v3_EGFR <- epi_v3_data2[.("EGFR",variants_type_target), on=.(variant_A, variants_type)]
 epi_v3_EGFR_NA <- epi_v3_EGFR[is.na(ces_B_on_A)]
-nrow(epi_v3_EGFR_NA) ## there are 15个 gene pair have NA ces_B_on_A
+nrow(epi_v3_EGFR_NA) 
 epi_v3_EGFR <- epi_v3_EGFR[!is.na(ces_B_on_A)]
 ## use the gene_order_KRAS
 epi_v3_EGFR[,variant_B_s := factor(variant_B_s, levels = gene_order_KRAS, ordered = T )] 
@@ -332,7 +329,9 @@ dev.off()
 
 ## using non-overlapping CI as the standards; only show those points with non-overlapping CIs ####
 gene_tsg_signifi_gene <- c("KEAP1","KMT2D","p16INK4a","ARID2","ATRX","ATM","APC")
-epi_v3_EGFR_signifi <-  epi_v3_EGFR[variant_B_s %in% variant_tsg_signifi_gene]
+epi_v3_EGFR_signifi <-  epi_v3_EGFR[variant_B_s %in% gene_tsg_signifi_gene]
+epi_v3_EGFR_signifi[,variant_B_s := as.character(variant_B_s) ] ## unfactor
+epi_v3_EGFR_signifi[,variant_B_s := factor(variant_B_s, levels = gene_tsg_signifi_gene, ordered = T)]
 gene_tsg_signifi <- data.frame(gene_tsg_signifi_gene = gene_tsg_signifi_gene,
                                   p_value_anno_nonOverlap = c("*"))
 
@@ -347,7 +346,6 @@ p_EGFR_select_signifi <- ggplot(data= epi_v3_EGFR_signifi, aes(x= data_type , y 
   scale_y_log10(labels = function(x) format(x, big.mark = ",", scientific = F))+
   scale_x_discrete(labels = c("All","Smoker","Never-smoker"))+ ## change the x-axis label
   theme_minimal()+
-  mia_theme_forPoster+
   facet_wrap(~variant_B_s, nrow=1)+
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 45, hjust = 1, size=16,face = "bold"),

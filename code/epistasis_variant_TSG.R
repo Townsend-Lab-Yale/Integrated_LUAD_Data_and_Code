@@ -61,7 +61,7 @@ epi_data[,variant_B_s := variant_B]
 epi_data[stringr::str_detect(variant_B_s,"\\."),variant_B_s := stringr::str_split(variant_B_s,"\\.", simplify = T)[,2]]
 
 
-save(epi_data, file = "epi_data_variant_TSG.Rdata")
+save(epi_data, file = paste0(rdata_output, "epistasis_variant_TSG_output.Rdata"))
 
 ## Visualizing the ces_B_on_A #######
 
