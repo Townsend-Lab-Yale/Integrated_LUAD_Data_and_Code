@@ -1,7 +1,7 @@
 # rm(list=ls())
 if(!require("cancereffectsizeR")){
 ## use cancereffectsizeR v2.10.1 here
-  remotes::install_github("Townsend-Lab-Yale/cancereffectsizeR@v2.10.1", lib = cancereffectR_package_loc , dependencies = T, force = T)
+  remotes::install_github("Townsend-Lab-Yale/cancereffectsizeR@v2.10.1", dependencies = T, force = T)
   packageVersion("cancereffectsizeR") ## v2.10.1
 }  
 if(!require("ces.refset.hg19")){
