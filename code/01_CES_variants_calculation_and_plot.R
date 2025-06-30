@@ -458,6 +458,20 @@ write.csv(
   cesa$samples,
   file = paste0(location_output, "sample_sequencingType_source_info.csv")
 )
+maf_mutation_gene <- cesa$maf
+sapply(cesa$maf, is.list)
+maf_mutation_gene[] <- lapply(maf_mutation_gene, function(col) {
+  if (is.list(col)) {
+    sapply(col, toString)
+  } else {
+    col
+  }
+})
+write.csv(
+  maf_mutation_gene,
+  file = paste0(location_output, "merged_luad_maf_TransvertToGene.csv")
+)
+
 ## calculate mutation rates for all samples, smokers, and never-smokers  ####
 treated_samples_signature_exclusions <- suggest_cosmic_signature_exclusions(
   cancer_type = "LUAD",
