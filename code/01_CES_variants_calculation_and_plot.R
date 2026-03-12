@@ -1,12 +1,12 @@
 # rm(list=ls())
 if (!require("cancereffectsizeR")) {
-  ## use cancereffectsizeR v2.10.1 here
+  ## use cancereffectsizeR v2.10.2 here
   remotes::install_github(
-    "Townsend-Lab-Yale/cancereffectsizeR@v2.10.1",
+    "Townsend-Lab-Yale/cancereffectsizeR@v2.10.2",
     dependencies = T,
     force = T
   )
-  packageVersion("cancereffectsizeR") ## v2.10.1
+  packageVersion("cancereffectsizeR") ## v2.10.2
 }
 if (!require("ces.refset.hg19")) {
   ## use ces.refset.hg19 as the reference dataset here
@@ -16,6 +16,7 @@ if (!require("ces.refset.hg19")) {
     force = T
   )
   require("ces.refset.hg19")
+  packageVersion("ces.refset.hg19") ## v1.1.3
 }
 
 ##  import other libraries
@@ -170,6 +171,7 @@ TSP_maf <- preload_maf(
   keep_extra_columns = T
 )
 TSP_maf <- TSP_maf[is.na(problem)]
+# why remove
 TSP_maf <- TSP_maf[
   !Unique_Patient_Identifier %in%
     c("luad_tsp_16929", "luad_tsp_16901", "luad_tsp_16875", "luad_tsp_16915")
@@ -205,7 +207,7 @@ genie_panels_used <- fread(paste0(
 
 ### read in genes included in each panel and creating GRANGES object (bed files)  to pass into covered_regions parameter of load_maf
 ### once the granges are exported once, these functions don't need to be run anymore
-# gene_granges <- rtracklayer::import(paste0(location_data, "gencode.v38lift37.basic.annotation.gtf"))
+# gene_granges <- rtracklayer::import(paste0(location_data, "gencode.v38lift37.basic.annotation.gtf")) ## too large
 load(paste0(rdata_output, "gencode.v38lift37.basic.annotation.gtf.Rdata"))
 
 location_bed <- paste0(location_data, 'bed_files/')
@@ -453,6 +455,7 @@ save_cesa(cesa, paste0(rdata_output, "load_maf_cesa_WES_TGS_WGS.rds"))
 cesa_smoking_w_panel <- cesa
 cesa_nonsmoking_w_panel <- cesa
 
+
 nrow(cesa$samples) ## 9459
 write.csv(
   cesa$samples,
@@ -460,6 +463,12 @@ write.csv(
 )
 maf_mutation_gene <- cesa$maf
 sapply(cesa$maf, is.list)
+# Unique_Patient_Identifier                Chromosome            Start_Position          Reference_Allele              Tumor_Allele              variant_type
+# FALSE                     FALSE                     FALSE                     FALSE                     FALSE                     FALSE
+# variant_id                     genes                  top_gene           top_consequence               prelift_chr             prelift_start
+# FALSE                      TRUE                     FALSE                     FALSE                     FALSE                     FALSE
+# liftover_strand_flip
+# FALSE
 maf_mutation_gene[] <- lapply(maf_mutation_gene, function(col) {
   if (is.list(col)) {
     sapply(col, toString)
@@ -471,7 +480,8 @@ write.csv(
   maf_mutation_gene,
   file = paste0(location_output, "merged_luad_maf_TransvertToGene.csv")
 )
-
+# head(maf_mutation_gene)
+# head(maf_file)
 ## calculate mutation rates for all samples, smokers, and never-smokers  ####
 treated_samples_signature_exclusions <- suggest_cosmic_signature_exclusions(
   cancer_type = "LUAD",
@@ -501,7 +511,7 @@ sample_with_clinInfo <- c(
   all_untreated_samples_for_sigs,
   all_treatment_not_indicated_samples_for_sigs
 )
-### calculate trinucleotide mutation rates for pan data####
+### calculate trinucleotide mutation rates for pan data, needed for determinting smoking history from SBS4 weights####
 cesa <- trinuc_mutation_rates(
   cesa,
   signature_set = ces.refset.hg19$signatures$COSMIC_v3.2,
@@ -530,7 +540,7 @@ snv_counts <- cesa$maf[
   .N,
   by = "Unique_Patient_Identifier"
 ]
-good_samples <- snv_counts[N > 50, Unique_Patient_Identifier]
+good_samples <- snv_counts[N > 50, Unique_Patient_Identifier] ## only 1165 samples among 9027 samples have >50 SNV
 
 
 #### NSLC_NCI patients will be added to the nonsmoking_samples list
@@ -562,7 +572,8 @@ panel_smoking_samples = unique(maf_clinical[
 panel_nonsmoking_samples = unique(maf_clinical[
   Source %in% c('MSK2017', 'MSK2018')
 ][Smoker == F, `Sample ID`])
-length(sample_with_clinInfo)
+length(sample_with_clinInfo) ## 9230
+
 
 sample_smo_wP_forCesa <- cesa_smoking_w_panel$samples[
   Unique_Patient_Identifier %in%
@@ -580,6 +591,12 @@ sample_nonsmo_wP_forCesa <- cesa_nonsmoking_w_panel$samples[
     ),
   Unique_Patient_Identifier
 ] ## 656
+
+sample_pan_forCsea <- cesa$samples[
+  Unique_Patient_Identifier %in% sample_with_clinInfo,
+  Unique_Patient_Identifier
+] ## 9230
+
 ### calculate trinucleotide mutation rates for smoker####
 cesa_smoking_w_panel <- trinuc_mutation_rates(
   cesa_smoking_w_panel,
@@ -641,6 +658,13 @@ cesa_nonsmoking_w_panel = gene_mutation_rates(
   samples = sample_nonsmo_wP_forCesa
 )
 
+### calculate gene mutation rates for pan data ####
+cesa <- gene_mutation_rates(
+  cesa,
+  covariates = "lung",
+  samples = sample_pan_forCsea
+)
+
 
 ## calculate cancer effect size ####
 ### calculate cancer effect size for smokers #####
@@ -680,6 +704,13 @@ table(
 # exome   genome targeted
 # 304      190      162
 
+### calculate cancer effect size for all samples #####
+cesa <- ces_variant(
+  cesa = cesa,
+  run_name = "recurrents",
+  samples = sample_pan_forCsea
+) ## on
+
 save_cesa(cesa_smoking_w_panel, paste0(rdata_output, "cesa_smoking.rds"))
 save_cesa(cesa_nonsmoking_w_panel, paste0(rdata_output, "cesa_nonsmoking.rds"))
 # cesa_smoking_w_panel <- load_cesa(paste0(rdata_output, "cesa_smoking.rds"))
@@ -712,58 +743,614 @@ target_effect[,
 ]
 
 
-svg(file = "p_ces_variant.svg", height = 11, width = 8)
-variant_label <- target_effect[,
+# svg(file = "p_ces_variant.svg", height = 11, width = 8)
+# variant_label <- target_effect[,
+#   .(max_y = max(selection_intensity)),
+#   by = variant_name
+# ]
+# ggplot(
+#   target_effect,
+#   aes(x = variant_name, y = selection_intensity, fill = group)
+# ) +
+#   geom_bar(
+#     stat = "identity",
+#     color = "black",
+#     position = position_dodge(width = 0.9)
+#   ) + ##"dodge"
+#   geom_errorbar(
+#     aes(ymin = ci_low_95, ymax = ci_high_95),
+#     color = "black",
+#     na.rm = T,
+#     width = 0.3,
+#     linewidth = 0.6,
+#     position = position_dodge(width = 0.9)
+#   ) + ##position_dodge(width = 0.5)
+#   # Add variant_name labels above the bars
+#   geom_text(
+#     data = variant_label,
+#     aes(x = variant_name, y = max(max_y) * 3, label = variant_name),
+#     inherit.aes = F,
+#     vjust = 0,
+#     size = 5,
+#     fontface = "bold"
+#   ) +
+#   scale_x_discrete(labels = rep(c("Never-smoker", "Smoker"), length.out = 8)) +
+#   scale_y_continuous(
+#     trans = scales::pseudo_log_trans(base = 10),
+#     breaks = c(0.01, 1, 100, 10000, 1000000),
+#     labels = scales::label_comma(accuracy = 1),
+#     expand = expansion(mult = c(0.05, 0.05))
+#   ) +
+#   labs(x = "", y = "Cancer effect size") +
+#   scale_fill_manual(values = c("Smoker" = "#D2B48C", "Never-smoker" = "pink")) +
+#   theme_classic() +
+#   theme(
+#     legend.direction = "horizontal",
+#     legend.position = "bottom",
+#     legend.box = "vertical",
+#     legend.text = element_text(size = 18),
+#     legend.title = element_text(size = 18),
+#     axis.text.x = element_blank(),
+#     axis.text.y = element_text(size = 18, face = "bold"),
+#     axis.title.y = element_text(size = 18, face = "bold"),
+#     axis.title.x = element_text(size = 18, face = "bold")
+#   ) +
+#   guides(fill = F)
+#
+# dev.off()
+
+## Fig 1A: only NS, smoker, fill by group; use bar instead of point; pink & brown is better；do a square-root transformation ####
+min(target_effect[!group %in% c("Smo_NS"), ci_low_95]) # 4340.395
+max(target_effect[!group %in% c("Smo_NS"), ci_high_95]) #  1212397
+
+variant_label <- target_effect[!group %in% c("Smo_NS")][,
   .(max_y = max(selection_intensity)),
   by = variant_name
 ]
-ggplot(
-  target_effect,
-  aes(x = variant_name, y = selection_intensity, fill = group)
-) +
-  geom_bar(
-    stat = "identity",
-    color = "black",
-    position = position_dodge(width = 0.9)
-  ) + ##"dodge"  这个设置不同 group 之间 SI 点分离的距离
-  geom_errorbar(
-    aes(ymin = ci_low_95, ymax = ci_high_95),
-    color = "black",
-    na.rm = T,
-    width = 0.3,
-    linewidth = 0.6,
-    position = position_dodge(width = 0.9)
-  ) + ##position_dodge(width = 0.5)
-  # Add variant_name labels above the bars
-  geom_text(
-    data = variant_label,
-    aes(x = variant_name, y = max(max_y) * 3, label = variant_name),
-    inherit.aes = F,
-    vjust = 0,
-    size = 5,
-    fontface = "bold"
-  ) +
-  scale_x_discrete(labels = rep(c("Never-smoker", "Smoker"), length.out = 8)) +
-  scale_y_continuous(
-    trans = scales::pseudo_log_trans(base = 10),
-    breaks = c(0.01, 1, 100, 10000, 1000000),
-    labels = scales::label_comma(accuracy = 1),
-    expand = expansion(mult = c(0.05, 0.05))
-  ) +
-  labs(x = "", y = "Cancer effect size") +
-  scale_fill_manual(values = c("Smoker" = "#D2B48C", "Never-smoker" = "pink")) +
-  theme_classic() +
-  theme(
-    legend.direction = "horizontal",
-    legend.position = "bottom",
-    legend.box = "vertical",
-    legend.text = element_text(size = 18),
-    legend.title = element_text(size = 18),
-    axis.text.x = element_blank(),
-    axis.text.y = element_text(size = 18, face = "bold"),
-    axis.title.y = element_text(size = 18, face = "bold"),
-    axis.title.x = element_text(size = 18, face = "bold")
-  ) +
-  guides(fill = F)
+variant_label[, variant_name2 := gsub("_", " ", variant_name)]
+# svg(file = "p_ces_variant.svg", height = 11, width = 8)
+#
+# # the data pans a large range (4342 to 1212428), undo the log or pseudo-log transformation and instead apply a square-root transformation to reduce visual compression while preserving some of the dynamic range.
+# ggplot(
+#   target_effect[!group %in% c("Smo_NS")],
+#   aes(x = variant_name, y = selection_intensity, fill = group)
+# ) +
+#   geom_bar(
+#     stat = "identity",
+#     color = "black",
+#     position = position_dodge(width = 0.9)
+#   ) + ##"dodge"  这个设置不同 group 之间 SI 点分离的距离
+#   geom_errorbar(
+#     aes(ymin = ci_low_95, ymax = ci_high_95),
+#     color = "black",
+#     na.rm = T,
+#     width = 0.3,
+#     linewidth = 0.6,
+#     position = position_dodge(width = 0.9)
+#   ) + ##position_dodge(width = 0.5)
+#   # Add variant_name labels above the bars
+#   geom_text(
+#     data = variant_label,
+#     aes(x = variant_name, y = max(max_y) * 1.4, label = variant_name2),
+#     inherit.aes = F,
+#     vjust = 0,
+#     size = 5,
+#     fontface = "bold"
+#   ) +
+#
+#   # Modify x-axis to show "Never-smoker" and "Smoker" below the bars
+#   #scale_x_discrete(labels = c("Never-smoker", "Smoker")) +
+#   scale_x_discrete(labels = rep(c("Never-smoker", "Smoker"), length.out = 8)) +
+#   # scale_y_log10(labels = function(x) format(x, big.mark = ",", scientific = F))+ ## expand = expansion(mult = c(0.01,0.05))
+#   scale_y_continuous(
+#     trans = "sqrt",
+#     breaks = c(
+#       5000,
+#       10000,
+#       20000,
+#       50000,
+#       100000,
+#       200000,
+#       400000,
+#       800000,
+#       1200000
+#     ),
+#     labels = scales::label_comma(accuracy = 1),
+#     expand = expansion(mult = c(0.05, 0.05))
+#   ) +
+#   labs(x = "", y = "Cancer effect size") + ## "Somatic variant"
+#   scale_fill_manual(values = c("Smoker" = "#D2B48C", "Never-smoker" = "pink")) +
+#   theme_classic() + ## theme_minimal()
+#   theme(
+#     legend.direction = "horizontal",
+#     legend.position = "bottom",
+#     legend.box = "vertical",
+#     legend.text = element_text(size = 18),
+#     legend.title = element_text(size = 18),
+#     axis.text.x = element_blank(), #element_text( size=18,face = "bold",angle = 30, hjust = 1), ## , angle = 30
+#     axis.text.y = element_text(size = 18, face = "bold"),
+#     axis.title.y = element_text(size = 18, face = "bold"),
+#     axis.title.x = element_text(size = 18, face = "bold")
+#   ) +
+#   guides(fill = "none")
+#
+#
+# dev.off()
 
+# add tumor growth in mice information -----
+## tumor growth vs scaled human CES data; bar plot; dual axis ########
+tm_m <- fread(paste0(
+  location_data,
+  "fig3f_sgInertTumorBurden_webPlotDigitizer_final.csv"
+))
+# head(tm_m)
+tm_m$Genotype <- recode(
+  ## to keep consistent with target_effect
+  tm_m$Genotype,
+  "G12D" = "KRAS_G12D",
+  "G12C" = "KRAS_G12C",
+  "EGFR" = "EGFR_L858R",
+  "BRAF" = "BRAF_V600E"
+)
+# comput the scaling factor
+mean_mouse_growth <- mean(tm_m$TM_M)
+mean_ces <- mean(target_effect$selection_intensity)
+
+median_mouse_growth <- median(tm_m$TM_M)
+median_ces <- median(target_effect$selection_intensity)
+
+## scale mouse to human
+scaling_factor_mean <- mean_ces / mean_mouse_growth ## 0.01642605
+scaling_factor_median <- median_ces / median_mouse_growth ## 0.01053374. the scale factor is too small, the mouse bar will appear tiny. so we do the reverse way, scale human to mouse
+
+## scale human to mouse
+scaling_factor_mean_rs <- mean_mouse_growth / mean_ces ## 60.87892
+scaling_factor_median_rs <- median_mouse_growth / median_ces ## 94.93306
+
+# create a human_Scaled data frame, here is "a global median-matching across variants, not per-variant scaling."
+target_effect_sim <- target_effect[, .(
+  variant_name,
+  group,
+  selection_intensity,
+  ci_low_95,
+  ci_high_95
+)]
+setnames(
+  target_effect_sim,
+  old = c("selection_intensity", "ci_low_95", "ci_high_95"),
+  new = c("selection_intensity_ori", "ci_low_95_ori", "ci_high_95_ori")
+)
+human_scaled_median <- target_effect_sim %>%
+  mutate(
+    group = paste0(group, "_scaledToMouse"),
+    selection_intensity = selection_intensity_ori * scaling_factor_median_rs,
+    ci_low_95 = ci_low_95_ori * scaling_factor_median_rs,
+    ci_high_95 = ci_high_95_ori * scaling_factor_median_rs
+  )
+
+human_scaled_mean <- target_effect_sim %>%
+  mutate(
+    group = paste0(group, "_scaledToMouse"),
+    selection_intensity = selection_intensity_ori * scaling_factor_mean_rs,
+    ci_low_95 = ci_low_95_ori * scaling_factor_mean_rs,
+    ci_high_95 = ci_high_95_ori * scaling_factor_mean_rs
+  )
+
+
+# mouse raw data
+mouse_raw_median <- data.frame(
+  group = "Mouse_raw",
+  selection_intensity = tapply(tm_m$TM_M, tm_m$Genotype, median),
+  ci_low_95 = tapply(tm_m$TM_M, tm_m$Genotype, function(x) quantile(x, 0.025)),
+  ci_high_95 = tapply(tm_m$TM_M, tm_m$Genotype, function(x) quantile(x, 0.975))
+)
+mouse_raw_median$variant_name <- rownames(mouse_raw_median)
+
+mouse_raw_mean <- data.frame(
+  group = "Mouse_raw",
+  selection_intensity = tapply(tm_m$TM_M, tm_m$Genotype, mean),
+  ci_low_95 = tapply(tm_m$TM_M, tm_m$Genotype, function(x) quantile(x, 0.025)),
+  ci_high_95 = tapply(tm_m$TM_M, tm_m$Genotype, function(x) quantile(x, 0.975))
+)
+mouse_raw_mean$variant_name <- rownames(mouse_raw_mean)
+
+# # mouse scaled data
+# # prefer to use mean value to do the scaling as human CES valus are from likelihood models (model-derived means)
+# # but if use tm_mean, then the order is not consistent with the original paper. the original paper use median value as tumor burden are skewed distributions
+# mouse_scaled_mean <- data.frame(
+#   #variant_name = unique(tm_m$Genotype),  # e.g., "G12D"
+#   group = "Mouse_mean", # new group label
+#   selection_intensity = tapply(tm_m$TM_M, tm_m$Genotype, mean) *
+#     scaling_factor_mean,
+#   ci_low_95 = tapply(tm_m$TM_M, tm_m$Genotype, function(x) quantile(x, 0.025)) *
+#     scaling_factor_mean,
+#   ci_high_95 = tapply(
+#     tm_m$TM_M,
+#     tm_m$Genotype,
+#     function(x) quantile(x, 0.975)
+#   ) *
+#     scaling_factor_mean
+# )
+# mouse_scaled_mean$variant_name <- rownames(mouse_scaled_mean)
+#
+# # median
+# mouse_scaled_median <- data.frame(
+#   #variant_name = unique(tm_m$Genotype),  # e.g., "G12D"
+#   group = "Mouse_median", # new group label
+#   selection_intensity = tapply(tm_m$TM_M, tm_m$Genotype, median) *
+#     scaling_factor_median,
+#   ci_low_95 = tapply(tm_m$TM_M, tm_m$Genotype, function(x) quantile(x, 0.025)) *
+#     scaling_factor_median,
+#   ci_high_95 = tapply(
+#     tm_m$TM_M,
+#     tm_m$Genotype,
+#     function(x) quantile(x, 0.975)
+#   ) *
+#     scaling_factor_median
+# )
+# mouse_scaled_median$variant_name <- rownames(mouse_scaled_median)
+
+# combine scaled data
+combined_df_median <- rbind(
+  human_scaled_median[, c(
+    "group",
+    "selection_intensity",
+    "ci_low_95",
+    "ci_high_95",
+    "variant_name"
+  )],
+  mouse_raw_median
+)
+combined_df_mean <- rbind(
+  human_scaled_mean[, c(
+    "group",
+    "selection_intensity",
+    "ci_low_95",
+    "ci_high_95",
+    "variant_name"
+  )],
+  mouse_raw_mean
+)
+
+combined_df_median$variant_name <- factor(
+  combined_df_median$variant_name,
+  levels = c("KRAS_G12D", "BRAF_V600E", "KRAS_G12C", "EGFR_L858R")
+)
+combined_df_mean$variant_name <- factor(
+  combined_df_mean$variant_name,
+  levels = c("KRAS_G12D", "BRAF_V600E", "KRAS_G12C", "EGFR_L858R")
+)
+combined_df_median$variant_name_label <- stringr::str_replace(
+  combined_df_median$variant_name,
+  "_",
+  " "
+)
+combined_df_median$variant_name_label <- factor(
+  combined_df_median$variant_name_label,
+  levels = c("KRAS G12D", "BRAF V600E", "KRAS G12C", "EGFR L858R")
+)
+combined_df_mean$variant_name_label <- stringr::str_replace(
+  combined_df_mean$variant_name,
+  "_",
+  " "
+)
+combined_df_mean$variant_name_label <- factor(
+  combined_df_mean$variant_name_label,
+  levels = c("KRAS G12D", "BRAF V600E", "KRAS G12C", "EGFR L858R")
+)
+
+# str(combined_df_median)
+# plot
+library(ggplot2)
+
+plot_dual_axis <- function(
+  df,
+  title_text = NULL,
+  reverse_scaling_factor = reverse_scaling_factor
+) {
+  ggplot(
+    df,
+    aes(x = variant_name_label, y = selection_intensity, fill = group)
+  ) +
+    geom_bar(
+      stat = "identity",
+      # need to explicitly set bar width <= dodge width
+      width = 0.8, ## if not explicitly assign, then the default value is 0.9, which is larger than the dodge width, leading to overlapping bars
+      position = position_dodge(width = 0.8), # , preserve = "single"
+      color = "black"
+    ) +
+    geom_errorbar(
+      aes(ymin = ci_low_95, ymax = ci_high_95),
+      width = 0.3,
+      position = position_dodge(width = 0.8), # , preserve = "single"
+      color = "black"
+    ) +
+    scale_y_continuous(
+      name = "Tumor growth in mice (neoplastic cells / 1e5 ifu)",
+      sec.axis = sec_axis(
+        trans = ~ . / reverse_scaling_factor, ## scaled back to human CES
+        labels = function(x) format(x, big.mark = ",", scientific = F),
+        name = "Scaled selection coefficient" #,
+        # breaks = c(1e4, 1e5, 5e5, 1e6, 2e6),
+        # labels = label_comma(accuracy = 1),
+        # trans = pseudo_log_trans(base = 10)
+      ),
+      # trans = scales::pseudo_log_trans(base = 10),
+      # breaks = c(1e4, 1e5, 5e5, 1e6, 2e6),
+      # labels = label_comma(accuracy = 1),
+      labels = function(x) format(x, big.mark = ",", scientific = F) #,
+      # expand = expansion(mult = c(0.05, 0.1))
+    ) +
+    scale_fill_manual(
+      name = "Group",
+      labels = c("Mice", "Never-smoker", "Smoker"),
+      values = c(
+        "Smoker_scaledToMouse" = "#D2B48C",
+        "Never-smoker_scaledToMouse" = "pink",
+        "Mouse_raw" = "#999999"
+      )
+    ) +
+    labs(x = "", fill = "Group", title = title_text) +
+    theme_classic() +
+    theme(
+      axis.text.x = element_text(size = 18, face = "bold"), # angle = 45,hjust = 1
+      axis.text.y = element_text(size = 18),
+      axis.title.y = element_text(size = 18, face = "bold"),
+      axis.title.y.right = element_text(
+        size = 18,
+        face = "bold" #,
+        #color = "black"
+      ),
+      axis.title.x = element_text(size = 18, face = "bold"),
+      legend.position = "none"
+    )
+}
+
+svg(
+  file = "p_MicetTumorGrowth_Median_vs_CES_scaled_v9.svg",
+  height = 8,
+  width = 12
+)
+plot_dual_axis(
+  combined_df_median,
+  # "Mouse (median) vs Human (CES scaled to mouse)",
+  reverse_scaling_factor = scaling_factor_median_rs
+)
 dev.off()
+# svg can not directly be inserted into google doc, so use jpeg instead
+jpeg(
+  file = "p_MicetTumorGrowth_Median_vs_CES_scaled_v9.jpeg",
+  height = 8,
+  width = 12,
+  units = 'in',
+  res = 600
+)
+plot_dual_axis(
+  combined_df_median,
+  # "Mouse (median) vs Human (CES scaled to mouse)",
+  reverse_scaling_factor = scaling_factor_median_rs
+)
+dev.off()
+svg(
+  file = "p_MicetTumorGrowth_Mean_vs_CES_scaled_v9.svg",
+  height = 8,
+  width = 12
+)
+plot_dual_axis(
+  combined_df_mean,
+  # "Mouse (mean) vs Human (CES scaled to mouse)",
+  reverse_scaling_factor = scaling_factor_mean_rs
+)
+dev.off()
+# svg can not directly be inserted into google doc, so use jpeg instead
+jpeg(
+  file = "p_MicetTumorGrowth_Mean_vs_CES_scaled_v9.jpeg",
+  height = 8,
+  width = 12,
+  units = 'in',
+  res = 600
+)
+plot_dual_axis(
+  combined_df_mean,
+  # "Mouse (median) vs Human (CES scaled to mouse)",
+  reverse_scaling_factor = scaling_factor_mean_rs
+)
+dev.off()
+
+## scaled tumor growth vs human CES data; scatter plot #####
+# scatter plot: compare relative tumor size/number with CES_B_on_A-----
+draw_scatter_forCES <- function(
+  human_data,
+  MiceTumorData,
+  MiceTumorData_type = "size", ## "size" or "number"
+
+  #MiceTumorlimit,
+  # data_type,
+  max_overlaps = 10 ## default
+) {
+  ## MiceTumorlimit = c(0.5,32)
+  library(ggplot2)
+  #variants <- deparse(substitute(variant_onco)) # Get the name of the variable passed as variant_onco
+  human_TS_data <- dplyr::inner_join(
+    human_data,
+    MiceTumorData,
+    by = c("variant_name")
+  )
+
+  pearson_corr <- cor.test(
+    human_TS_data$tumorGrowth,
+    human_TS_data$selection_intensity,
+    method = c("pearson")
+  ) ## can only assign one method each time
+  pearson_r <- pearson_corr$estimate
+  pearson_p <- pearson_corr$p.value
+
+  spearman_corr <- cor.test(
+    human_TS_data$tumorGrowth,
+    human_TS_data$selection_intensity,
+    method = c("spearman")
+  ) ## can only assign one method each time
+  spearman_r <- spearman_corr$estimate
+  spearman_p <- spearman_corr$p.value
+
+  pp_wo_smooth <- ggplot(
+    data = human_TS_data[order(-selection_intensity)],
+    aes(x = selection_intensity, y = tumorGrowth)
+  ) + ##reorder(variant_B, log10(ces_B_on_A))
+
+    labs(
+      y = "Tumor growth in mice (neoplastic cells / 1e5 ifu)"
+    ) +
+    xlab(bquote(
+      ~Cancer ~ Effect ~ Size ~ scriptstyle(~ ~ (log[10]))
+    )) +
+    scale_x_log10(
+      labels = function(x) format(x, big.mark = ",", scientific = F)
+    ) +
+    scale_y_log10(
+      labels = function(x) format(x, big.mark = ",", scientific = F)
+    ) +
+    #scale_y_continuous(trans = "log2", limits = MiceTumorlimit) + #tgutil::scale_y_log2()+
+    geom_errorbar(
+      data = human_TS_data[
+        !is.na(human_TS_data$ci_low_95_TMm) &
+          !is.na(human_TS_data$ci_high_95_TMm),
+      ],
+      aes(ymin = ci_low_95_TMm, ymax = ci_high_95_TMm),
+      width = 0,
+      color = "grey"
+    ) +
+    geom_errorbar(
+      data = human_TS_data[
+        !is.na(human_TS_data$ci_low_95) &
+          !is.na(human_TS_data$ci_high_95),
+      ],
+      aes(xmin = ci_low_95, xmax = ci_high_95),
+      width = 0,
+      color = "grey"
+    ) +
+    geom_point(aes(color = group, shape = group), size = 4) + ## position = "jitter", size = 1
+    #geom_smooth(method = "lm", se = T)+
+    ggrepel::geom_label_repel(
+      aes(label = variant_name, color = variant_name), # fill = group,
+      max.overlaps = max_overlaps,
+      # text
+      #fill = "grey",        # fill in the rectangle
+      # segment.colour = "grey",# border + connecting line
+
+      size = 3
+    ) +
+    theme_classic() +
+    #theme(legend.position = "none") +
+    guides(color = "none", label = "none")
+  labs(
+    title = paste(
+      expression(rho),
+      "=",
+      round(spearman_r, 2),
+      ";",
+      "p =",
+      format(spearman_p, scientific = TRUE, digits = 2),
+      "\n",
+      "r",
+      "=",
+      round(pearson_r, 2),
+      ";",
+      "p =",
+      format(pearson_p, scientific = TRUE, digits = 2)
+    )
+  )
+
+  return(
+    result = list(
+      pp_wo_smooth,
+      human_TS_data,
+      pearson_r,
+      pearson_p,
+      spearman_r,
+      spearman_p
+    )
+  )
+}
+target_effect_forScatter <- target_effect[, .(
+  variant_name,
+  group,
+  selection_intensity,
+  ci_low_95,
+  ci_high_95
+)]
+
+mouse_raw_median_forScatter <- data.frame(
+  tumorGrowth = tapply(tm_m$TM_M, tm_m$Genotype, median),
+  ci_low_95_TMm = tapply(
+    tm_m$TM_M,
+    tm_m$Genotype,
+    function(x) quantile(x, 0.025)
+  ),
+  ci_high_95_TMm = tapply(
+    tm_m$TM_M,
+    tm_m$Genotype,
+    function(x) quantile(x, 0.975)
+  )
+)
+mouse_raw_median_forScatter$variant_name <- rownames(
+  mouse_raw_median_forScatter
+)
+
+svg(
+  file = "p_MicetTumorGrowth_Median_vs_CES_scatter.svg",
+  height = 11,
+  width = 8
+)
+p_scatter <- draw_scatter_forCES(
+  target_effect_forScatter,
+  mouse_raw_median_forScatter
+)
+p_scatter[[1]]
+dev.off()
+
+## calculate the Pearson and Spearman correlations separately for smoker and never-smoker ####
+
+compute_corr <- function(df, label) {
+  pearson_corr <- cor.test(
+    df$tumorGrowth,
+    df$selection_intensity,
+    method = "pearson"
+  )
+
+  spearman_corr <- cor.test(
+    df$tumorGrowth,
+    df$selection_intensity,
+    method = "spearman"
+  )
+
+  data.frame(
+    group = label,
+    n = nrow(df),
+    pearson_r = unname(pearson_corr$estimate),
+    pearson_p = pearson_corr$p.value,
+    spearman_r = unname(spearman_corr$estimate),
+    spearman_p = spearman_corr$p.value
+  )
+}
+
+human_TS_data <- p_scatter[[2]]
+corr_results <- rbind(
+  compute_corr(
+    subset(human_TS_data, group == "Smoker"),
+    "Smoker"
+  ),
+  compute_corr(
+    subset(human_TS_data, group == "Never-smoker"),
+    "Never-smoker"
+  ),
+  compute_corr(
+    human_TS_data,
+    "NS_S"
+  )
+)
+
+corr_results
+
+## for testing
+cesa$coverage_ranges$exome$exome ## get the default exome covered region
