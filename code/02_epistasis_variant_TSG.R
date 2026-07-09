@@ -1219,6 +1219,287 @@ jpeg(
   plot_annotation(tag_levels = waiver())
 dev.off()
 
+### relative tumor size; keep all point ####
+## KRAS_G12D; keep near 0 CES values
+G12D_tumorSize <- fread(paste0(location_data, "G12D_data_tumorSize_final.csv"))
+
+epi_KRAS_G12D_nonS_TS_ana <- draw_scatter(
+  epi_KRAS_G12D_nonS,
+  G12D_tumorSize,
+  MiceTumorData_type = "size",
+  variant_onco = KRAS_G12D,
+  MiceTumorlimit = c(0.5, 32),
+  data_type = "nonS",
+  max_overlaps = 5,
+  label_y = 32,
+  label_x = 10
+)
+epi_KRAS_G12D_nonS_TS_ana[[2]]
+epi_KRAS_G12D_S_TS_ana <- draw_scatter(
+  epi_KRAS_G12D_S,
+  G12D_tumorSize,
+  MiceTumorData_type = "size",
+  variant_onco = KRAS_G12D,
+  MiceTumorlimit = c(0.5, 32),
+  data_type = "S",
+  max_overlaps = 5,
+  label_y = 32,
+  label_x = 0
+)
+epi_KRAS_G12D_S_TS_ana[[2]]
+
+## KRAS_G12C; rm near 0 CES values
+G12C_tumorSize <- fread(paste0(location_data, "G12C_data_tumorSize_final.csv"))
+epi_KRAS_G12C_S_TS_ana <- draw_scatter(
+  epi_KRAS_G12C_S,
+  G12C_tumorSize,
+  MiceTumorData_type = "size",
+  variant_onco = KRAS_G12C,
+  MiceTumorlimit = c(0.5, 32),
+  data_type = "S",
+  max_overlaps = 5,
+  label_y = 32,
+  label_x = 0
+)
+epi_KRAS_G12C_S_TS_ana[[2]]
+epi_KRAS_G12C_nonS_TS_ana <- draw_scatter(
+  epi_KRAS_G12C_nonS,
+  G12C_tumorSize,
+  MiceTumorData_type = "size",
+  variant_onco = KRAS_G12C,
+  MiceTumorlimit = c(0.5, 32),
+  data_type = "nonS",
+  max_overlaps = 5,
+  label_y = 32,
+  label_x = 0
+)
+epi_KRAS_G12C_nonS_TS_ana[[2]]
+## BRAF_V600E; rm near 0 CES values
+BRAF_V600E_tumorSize <- fread(paste0(
+  location_data,
+  "BRAF_V600E_data_tumorSize_final.csv"
+))
+epi_BRAF_V600E_S_TS_ana <- draw_scatter(
+  epi_BRAF_V600E_S,
+  BRAF_V600E_tumorSize,
+  MiceTumorData_type = "size",
+  variant_onco = BRAF_V600E,
+  MiceTumorlimit = c(0.25, 8),
+  data_type = "S",
+  max_overlaps = 5,
+  label_y = 8,
+  label_x = 0
+)
+epi_BRAF_V600E_S_TS_ana[[2]]
+epi_BRAF_V600E_nonS_TS_ana <- draw_scatter(
+  epi_BRAF_V600E_nonS,
+  BRAF_V600E_tumorSize,
+  MiceTumorData_type = "size",
+  variant_onco = BRAF_V600E,
+  MiceTumorlimit = c(0.25, 8),
+  data_type = "nonS",
+  max_overlaps = 5,
+  label_y = 8,
+  label_x = 0
+)
+epi_BRAF_V600E_nonS_TS_ana[[2]]
+## EGFR L858R; rm near 0 CES values
+EGFR_L858R_tumorSize <- fread(paste0(
+  location_data,
+  "EGFR_L858R_data_tumorSize_final.csv"
+))
+epi_EGFR_L858R_S_TS_ana <- draw_scatter(
+  epi_EGFR_L858R_S,
+  EGFR_L858R_tumorSize,
+  MiceTumorData_type = "size",
+  variant_onco = EGFR_L858R,
+  MiceTumorlimit = c(0.25, 8),
+  data_type = "S",
+  max_overlaps = 5,
+  label_y = 8,
+  label_x = 0
+)
+epi_EGFR_L858R_S_TS_ana[[2]]
+epi_EGFR_L858R_nonS_TS_ana <- draw_scatter(
+  epi_EGFR_L858R_nonS,
+  EGFR_L858R_tumorSize,
+  MiceTumorData_type = "size",
+  variant_onco = EGFR_L858R,
+  MiceTumorlimit = c(0.25, 8),
+  data_type = "nonS",
+  max_overlaps = 5,
+  label_y = 8,
+  label_x = 1
+)
+epi_EGFR_L858R_nonS_TS_ana[[2]]
+svg(file = "p_MiceTumorSize_vs_epi_keep0.svg", height = 24, width = 16)
+(epi_KRAS_G12C_nonS_TS_ana[[2]] | epi_KRAS_G12C_S_TS_ana[[2]]) /
+  (epi_KRAS_G12D_nonS_TS_ana[[2]] | epi_KRAS_G12D_S_TS_ana[[2]]) /
+  (epi_BRAF_V600E_nonS_TS_ana[[2]] | epi_BRAF_V600E_S_TS_ana[[2]]) /
+  (epi_EGFR_L858R_nonS_TS_ana[[2]] | epi_EGFR_L858R_S_TS_ana[[2]]) /
+  plot_annotation(tag_levels = waiver())
+dev.off()
+
+# svg(file = "p_MiceTumorSize_vs_epi_v2.svg", height = 16, width = 11)
+jpeg(
+  file = "p_MicetumorSize_vs_epi_keep0.jpeg",
+  height = 24,
+  width = 16,
+  unit = "in",
+  res = 600
+)
+(epi_KRAS_G12C_nonS_TS_ana[[2]] | epi_KRAS_G12C_S_TS_ana[[2]]) /
+  (epi_KRAS_G12D_nonS_TS_ana[[2]] | epi_KRAS_G12D_S_TS_ana[[2]]) /
+  (epi_BRAF_V600E_nonS_TS_ana[[2]] | epi_BRAF_V600E_S_TS_ana[[2]]) /
+  (epi_EGFR_L858R_nonS_TS_ana[[2]] | epi_EGFR_L858R_S_TS_ana[[2]]) /
+  plot_annotation(tag_levels = waiver())
+dev.off()
+
+### relative tumor number; keep all point ####
+## KRAS_G12D; keep near 0 CES values
+G12D_tumorNumber <- fread(paste0(
+  location_data,
+  "G12D_data_tumorNumber_final.csv"
+))
+
+epi_KRAS_G12D_nonS_TS_ana_TN <- draw_scatter(
+  epi_KRAS_G12D_nonS,
+  G12D_tumorNumber,
+  MiceTumorData_type = "number",
+  variant_onco = KRAS_G12D,
+  MiceTumorlimit = c(0.12, 8),
+  data_type = "nonS",
+  max_overlaps = 5,
+  label_y = 8,
+  label_x = 10
+)
+epi_KRAS_G12D_nonS_TS_ana_TN[[2]]
+epi_KRAS_G12D_S_TS_ana_TN <- draw_scatter(
+  epi_KRAS_G12D_S,
+  G12D_tumorNumber,
+  MiceTumorData_type = "number",
+  variant_onco = KRAS_G12D,
+  MiceTumorlimit = c(0.12, 8),
+  data_type = "S",
+  max_overlaps = 5,
+  label_y = 8,
+  label_x = 0
+)
+epi_KRAS_G12D_S_TS_ana_TN[[2]]
+
+## KRAS_G12C; rm near 0 CES values
+G12C_tumorNumber <- fread(paste0(
+  location_data,
+  "G12C_data_tumorNumber_final.csv"
+))
+epi_KRAS_G12C_S_TS_ana_TN <- draw_scatter(
+  epi_KRAS_G12C_S,
+  G12C_tumorNumber,
+  MiceTumorData_type = "number",
+  variant_onco = KRAS_G12C,
+  MiceTumorlimit = c(0.12, 8),
+  data_type = "S",
+  max_overlaps = 5,
+  label_y = 8,
+  label_x = 0
+)
+epi_KRAS_G12C_S_TS_ana_TN[[2]]
+epi_KRAS_G12C_nonS_TS_ana_TN <- draw_scatter(
+  epi_KRAS_G12C_nonS,
+  G12C_tumorNumber,
+  MiceTumorData_type = "number",
+  variant_onco = KRAS_G12C,
+  MiceTumorlimit = c(0.12, 8),
+  data_type = "nonS",
+  max_overlaps = 5,
+  label_y = 8,
+  label_x = 0
+)
+epi_KRAS_G12C_nonS_TS_ana_TN[[2]]
+## BRAF_V600E; rm near 0 CES values
+BRAF_V600E_tumorNumber <- fread(paste0(
+  location_data,
+  "BRAF_V600E_data_tumorNumber_final.csv"
+))
+epi_BRAF_V600E_S_TS_ana_TN <- draw_scatter(
+  epi_BRAF_V600E_S,
+  BRAF_V600E_tumorNumber,
+  MiceTumorData_type = "number",
+  variant_onco = BRAF_V600E,
+  MiceTumorlimit = c(0.12, 8),
+  data_type = "S",
+  max_overlaps = 5,
+  label_y = 8,
+  label_x = 0
+)
+epi_BRAF_V600E_S_TS_ana_TN[[2]]
+epi_BRAF_V600E_nonS_TS_ana_TN <- draw_scatter(
+  epi_BRAF_V600E_nonS,
+  BRAF_V600E_tumorNumber,
+  MiceTumorData_type = "number",
+  variant_onco = BRAF_V600E,
+  MiceTumorlimit = c(0.12, 8),
+  data_type = "nonS",
+  max_overlaps = 5,
+  label_y = 8,
+  label_x = 0
+)
+epi_BRAF_V600E_nonS_TS_ana_TN[[2]]
+## EGFR L858R; rm near 0 CES values
+EGFR_L858R_tumorNumber <- fread(paste0(
+  location_data,
+  "EGFR_L858R_data_tumorNumber_final.csv"
+))
+epi_EGFR_L858R_S_TS_ana_TN <- draw_scatter(
+  epi_EGFR_L858R_S,
+  EGFR_L858R_tumorNumber,
+  MiceTumorData_type = "number",
+  variant_onco = EGFR_L858R,
+  MiceTumorlimit = c(0.12, 8),
+  data_type = "S",
+  max_overlaps = 5,
+  label_y = 8,
+  label_x = 0
+)
+epi_EGFR_L858R_S_TS_ana_TN[[2]]
+epi_EGFR_L858R_nonS_TS_ana_TN <- draw_scatter(
+  epi_EGFR_L858R_nonS,
+  EGFR_L858R_tumorNumber,
+  MiceTumorData_type = "number",
+  variant_onco = EGFR_L858R,
+  MiceTumorlimit = c(0.12, 8),
+  data_type = "nonS",
+  max_overlaps = 5,
+  label_y = 8,
+  label_x = 0
+)
+epi_EGFR_L858R_nonS_TS_ana_TN[[2]]
+svg(file = "p_MicetumorNumber_vs_epi_keep0.svg", height = 24, width = 16)
+(epi_KRAS_G12C_nonS_TS_ana_TN[[2]] | epi_KRAS_G12C_S_TS_ana_TN[[2]]) /
+  (epi_KRAS_G12D_nonS_TS_ana_TN[[2]] | epi_KRAS_G12D_S_TS_ana_TN[[2]]) /
+  (epi_BRAF_V600E_nonS_TS_ana_TN[[2]] |
+    epi_BRAF_V600E_S_TS_ana_TN[[2]]) /
+  (epi_EGFR_L858R_nonS_TS_ana_TN[[2]] |
+    epi_EGFR_L858R_S_TS_ana_TN[[2]]) /
+  plot_annotation(tag_levels = waiver())
+dev.off()
+
+jpeg(
+  file = "p_MicetumorNumber_vs_epi_keep0.jpeg",
+  height = 24,
+  width = 16,
+  unit = "in",
+  res = 600
+)
+(epi_KRAS_G12C_nonS_TS_ana_TN[[2]] | epi_KRAS_G12C_S_TS_ana_TN[[2]]) /
+  (epi_KRAS_G12D_nonS_TS_ana_TN[[2]] | epi_KRAS_G12D_S_TS_ana_TN[[2]]) /
+  (epi_BRAF_V600E_nonS_TS_ana_TN[[2]] |
+    epi_BRAF_V600E_S_TS_ana_TN[[2]]) /
+  (epi_EGFR_L858R_nonS_TS_ana_TN[[2]] |
+    epi_EGFR_L858R_S_TS_ana_TN[[2]]) /
+  plot_annotation(tag_levels = waiver())
+dev.off()
+
 # # check the underlying mutation rate of CMTR2, MSH2, NF1
 # head(cesa$gene_rates)
 # cesa$gene_rates[gene %in% c("CMTR2", "MSH2", "NF1")]

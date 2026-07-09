@@ -1046,8 +1046,13 @@ library(ggplot2)
 plot_dual_axis <- function(
   df,
   title_text = NULL,
-  reverse_scaling_factor = reverse_scaling_factor
+  reverse_scaling_factor = reverse_scaling_factor,
+  lower_space_frac = 0.12, #0.08, ## the proportion of the maximum y value used to create extra space below the zero line.
+  upper_space_frac = 0.08 ## fraction of the y-axis maximum reserved as extra space above the tallest error bar
 ) {
+  y_top <- max(df$ci_high_95, na.rm = TRUE)
+  y_lower <- -lower_space_frac * y_top
+  y_upper <- (1 + upper_space_frac) * y_top
   ggplot(
     df,
     aes(x = variant_name_label, y = selection_intensity, fill = group)
@@ -1065,21 +1070,47 @@ plot_dual_axis <- function(
       position = position_dodge(width = 0.8), # , preserve = "single"
       color = "black"
     ) +
+    # scale_y_continuous(
+    #   name = "Tumor growth in mice (neoplastic cells / 1e5 ifu)",
+    #   sec.axis = sec_axis(
+    #     trans = ~ . / reverse_scaling_factor, ## scaled back to human CES
+    #     labels = function(x) format(x, big.mark = ",", scientific = F),
+    #     name = "Scaled selection coefficient" #,
+    #     # breaks = c(1e4, 1e5, 5e5, 1e6, 2e6),
+    #     # labels = label_comma(accuracy = 1),
+    #     # trans = pseudo_log_trans(base = 10)
+    #   ),
+    #   # trans = scales::pseudo_log_trans(base = 10),
+    #   # breaks = c(1e4, 1e5, 5e5, 1e6, 2e6),
+    #   # labels = label_comma(accuracy = 1),
+    #   labels = function(x) format(x, big.mark = ",", scientific = F) #,
+    #   # expand = expansion(mult = c(0.05, 0.1))
+    # ) +
     scale_y_continuous(
       name = "Tumor growth in mice (neoplastic cells / 1e5 ifu)",
+      labels = function(x) {
+        ifelse(
+          x < 0,
+          "",
+          format(x, big.mark = ",", scientific = FALSE)
+        )
+      },
       sec.axis = sec_axis(
-        trans = ~ . / reverse_scaling_factor, ## scaled back to human CES
-        labels = function(x) format(x, big.mark = ",", scientific = F),
-        name = "Scaled selection coefficient" #,
-        # breaks = c(1e4, 1e5, 5e5, 1e6, 2e6),
-        # labels = label_comma(accuracy = 1),
-        # trans = pseudo_log_trans(base = 10)
+        trans = ~ . / reverse_scaling_factor,
+        labels = function(x) {
+          ifelse(
+            x < 0,
+            "",
+            format(x, big.mark = ",", scientific = FALSE)
+          )
+        },
+        name = "Scaled selection coefficient"
       ),
-      # trans = scales::pseudo_log_trans(base = 10),
-      # breaks = c(1e4, 1e5, 5e5, 1e6, 2e6),
-      # labels = label_comma(accuracy = 1),
-      labels = function(x) format(x, big.mark = ",", scientific = F) #,
-      # expand = expansion(mult = c(0.05, 0.1))
+      expand = expansion(mult = c(0, 0))
+    ) +
+    coord_cartesian(
+      ylim = c(y_lower, y_upper),
+      clip = "off"
     ) +
     scale_fill_manual(
       name = "Group",
@@ -1107,7 +1138,7 @@ plot_dual_axis <- function(
 }
 
 svg(
-  file = "p_MicetTumorGrowth_Median_vs_CES_scaled_v9.svg",
+  file = "p_MicetTumorGrowth_Median_vs_CES_scaled_v11.svg",
   height = 8,
   width = 12
 )
@@ -1119,7 +1150,7 @@ plot_dual_axis(
 dev.off()
 # svg can not directly be inserted into google doc, so use jpeg instead
 jpeg(
-  file = "p_MicetTumorGrowth_Median_vs_CES_scaled_v9.jpeg",
+  file = "p_MicetTumorGrowth_Median_vs_CES_scaled_v11.jpeg",
   height = 8,
   width = 12,
   units = 'in',
@@ -1132,7 +1163,7 @@ plot_dual_axis(
 )
 dev.off()
 svg(
-  file = "p_MicetTumorGrowth_Mean_vs_CES_scaled_v9.svg",
+  file = "p_MicetTumorGrowth_Mean_vs_CES_scaled_v11.svg",
   height = 8,
   width = 12
 )
@@ -1144,7 +1175,7 @@ plot_dual_axis(
 dev.off()
 # svg can not directly be inserted into google doc, so use jpeg instead
 jpeg(
-  file = "p_MicetTumorGrowth_Mean_vs_CES_scaled_v9.jpeg",
+  file = "p_MicetTumorGrowth_Mean_vs_CES_scaled_v11.jpeg",
   height = 8,
   width = 12,
   units = 'in',
@@ -1157,200 +1188,200 @@ plot_dual_axis(
 )
 dev.off()
 
-## scaled tumor growth vs human CES data; scatter plot #####
-# scatter plot: compare relative tumor size/number with CES_B_on_A-----
-draw_scatter_forCES <- function(
-  human_data,
-  MiceTumorData,
-  MiceTumorData_type = "size", ## "size" or "number"
-
-  #MiceTumorlimit,
-  # data_type,
-  max_overlaps = 10 ## default
-) {
-  ## MiceTumorlimit = c(0.5,32)
-  library(ggplot2)
-  #variants <- deparse(substitute(variant_onco)) # Get the name of the variable passed as variant_onco
-  human_TS_data <- dplyr::inner_join(
-    human_data,
-    MiceTumorData,
-    by = c("variant_name")
-  )
-
-  pearson_corr <- cor.test(
-    human_TS_data$tumorGrowth,
-    human_TS_data$selection_intensity,
-    method = c("pearson")
-  ) ## can only assign one method each time
-  pearson_r <- pearson_corr$estimate
-  pearson_p <- pearson_corr$p.value
-
-  spearman_corr <- cor.test(
-    human_TS_data$tumorGrowth,
-    human_TS_data$selection_intensity,
-    method = c("spearman")
-  ) ## can only assign one method each time
-  spearman_r <- spearman_corr$estimate
-  spearman_p <- spearman_corr$p.value
-
-  pp_wo_smooth <- ggplot(
-    data = human_TS_data[order(-selection_intensity)],
-    aes(x = selection_intensity, y = tumorGrowth)
-  ) + ##reorder(variant_B, log10(ces_B_on_A))
-
-    labs(
-      y = "Tumor growth in mice (neoplastic cells / 1e5 ifu)"
-    ) +
-    xlab(bquote(
-      ~Cancer ~ Effect ~ Size ~ scriptstyle(~ ~ (log[10]))
-    )) +
-    scale_x_log10(
-      labels = function(x) format(x, big.mark = ",", scientific = F)
-    ) +
-    scale_y_log10(
-      labels = function(x) format(x, big.mark = ",", scientific = F)
-    ) +
-    #scale_y_continuous(trans = "log2", limits = MiceTumorlimit) + #tgutil::scale_y_log2()+
-    geom_errorbar(
-      data = human_TS_data[
-        !is.na(human_TS_data$ci_low_95_TMm) &
-          !is.na(human_TS_data$ci_high_95_TMm),
-      ],
-      aes(ymin = ci_low_95_TMm, ymax = ci_high_95_TMm),
-      width = 0,
-      color = "grey"
-    ) +
-    geom_errorbar(
-      data = human_TS_data[
-        !is.na(human_TS_data$ci_low_95) &
-          !is.na(human_TS_data$ci_high_95),
-      ],
-      aes(xmin = ci_low_95, xmax = ci_high_95),
-      width = 0,
-      color = "grey"
-    ) +
-    geom_point(aes(color = group, shape = group), size = 4) + ## position = "jitter", size = 1
-    #geom_smooth(method = "lm", se = T)+
-    ggrepel::geom_label_repel(
-      aes(label = variant_name, color = variant_name), # fill = group,
-      max.overlaps = max_overlaps,
-      # text
-      #fill = "grey",        # fill in the rectangle
-      # segment.colour = "grey",# border + connecting line
-
-      size = 3
-    ) +
-    theme_classic() +
-    #theme(legend.position = "none") +
-    guides(color = "none", label = "none")
-  labs(
-    title = paste(
-      expression(rho),
-      "=",
-      round(spearman_r, 2),
-      ";",
-      "p =",
-      format(spearman_p, scientific = TRUE, digits = 2),
-      "\n",
-      "r",
-      "=",
-      round(pearson_r, 2),
-      ";",
-      "p =",
-      format(pearson_p, scientific = TRUE, digits = 2)
-    )
-  )
-
-  return(
-    result = list(
-      pp_wo_smooth,
-      human_TS_data,
-      pearson_r,
-      pearson_p,
-      spearman_r,
-      spearman_p
-    )
-  )
-}
-target_effect_forScatter <- target_effect[, .(
-  variant_name,
-  group,
-  selection_intensity,
-  ci_low_95,
-  ci_high_95
-)]
-
-mouse_raw_median_forScatter <- data.frame(
-  tumorGrowth = tapply(tm_m$TM_M, tm_m$Genotype, median),
-  ci_low_95_TMm = tapply(
-    tm_m$TM_M,
-    tm_m$Genotype,
-    function(x) quantile(x, 0.025)
-  ),
-  ci_high_95_TMm = tapply(
-    tm_m$TM_M,
-    tm_m$Genotype,
-    function(x) quantile(x, 0.975)
-  )
-)
-mouse_raw_median_forScatter$variant_name <- rownames(
-  mouse_raw_median_forScatter
-)
-
-svg(
-  file = "p_MicetTumorGrowth_Median_vs_CES_scatter.svg",
-  height = 11,
-  width = 8
-)
-p_scatter <- draw_scatter_forCES(
-  target_effect_forScatter,
-  mouse_raw_median_forScatter
-)
-p_scatter[[1]]
-dev.off()
-
-## calculate the Pearson and Spearman correlations separately for smoker and never-smoker ####
-
-compute_corr <- function(df, label) {
-  pearson_corr <- cor.test(
-    df$tumorGrowth,
-    df$selection_intensity,
-    method = "pearson"
-  )
-
-  spearman_corr <- cor.test(
-    df$tumorGrowth,
-    df$selection_intensity,
-    method = "spearman"
-  )
-
-  data.frame(
-    group = label,
-    n = nrow(df),
-    pearson_r = unname(pearson_corr$estimate),
-    pearson_p = pearson_corr$p.value,
-    spearman_r = unname(spearman_corr$estimate),
-    spearman_p = spearman_corr$p.value
-  )
-}
-
-human_TS_data <- p_scatter[[2]]
-corr_results <- rbind(
-  compute_corr(
-    subset(human_TS_data, group == "Smoker"),
-    "Smoker"
-  ),
-  compute_corr(
-    subset(human_TS_data, group == "Never-smoker"),
-    "Never-smoker"
-  ),
-  compute_corr(
-    human_TS_data,
-    "NS_S"
-  )
-)
-
-corr_results
-
-## for testing
-cesa$coverage_ranges$exome$exome ## get the default exome covered region
+# ## scaled tumor growth vs human CES data; scatter plot #####
+# # scatter plot: compare relative tumor size/number with CES_B_on_A-----
+# draw_scatter_forCES <- function(
+#   human_data,
+#   MiceTumorData,
+#   MiceTumorData_type = "size", ## "size" or "number"
+#
+#   #MiceTumorlimit,
+#   # data_type,
+#   max_overlaps = 10 ## default
+# ) {
+#   ## MiceTumorlimit = c(0.5,32)
+#   library(ggplot2)
+#   #variants <- deparse(substitute(variant_onco)) # Get the name of the variable passed as variant_onco
+#   human_TS_data <- dplyr::inner_join(
+#     human_data,
+#     MiceTumorData,
+#     by = c("variant_name")
+#   )
+#
+#   pearson_corr <- cor.test(
+#     human_TS_data$tumorGrowth,
+#     human_TS_data$selection_intensity,
+#     method = c("pearson")
+#   ) ## can only assign one method each time
+#   pearson_r <- pearson_corr$estimate
+#   pearson_p <- pearson_corr$p.value
+#
+#   spearman_corr <- cor.test(
+#     human_TS_data$tumorGrowth,
+#     human_TS_data$selection_intensity,
+#     method = c("spearman")
+#   ) ## can only assign one method each time
+#   spearman_r <- spearman_corr$estimate
+#   spearman_p <- spearman_corr$p.value
+#
+#   pp_wo_smooth <- ggplot(
+#     data = human_TS_data[order(-selection_intensity)],
+#     aes(x = selection_intensity, y = tumorGrowth)
+#   ) + ##reorder(variant_B, log10(ces_B_on_A))
+#
+#     labs(
+#       y = "Tumor growth in mice (neoplastic cells / 1e5 ifu)"
+#     ) +
+#     xlab(bquote(
+#       ~Cancer ~ Effect ~ Size ~ scriptstyle(~ ~ (log[10]))
+#     )) +
+#     scale_x_log10(
+#       labels = function(x) format(x, big.mark = ",", scientific = F)
+#     ) +
+#     scale_y_log10(
+#       labels = function(x) format(x, big.mark = ",", scientific = F)
+#     ) +
+#     #scale_y_continuous(trans = "log2", limits = MiceTumorlimit) + #tgutil::scale_y_log2()+
+#     geom_errorbar(
+#       data = human_TS_data[
+#         !is.na(human_TS_data$ci_low_95_TMm) &
+#           !is.na(human_TS_data$ci_high_95_TMm),
+#       ],
+#       aes(ymin = ci_low_95_TMm, ymax = ci_high_95_TMm),
+#       width = 0,
+#       color = "grey"
+#     ) +
+#     geom_errorbar(
+#       data = human_TS_data[
+#         !is.na(human_TS_data$ci_low_95) &
+#           !is.na(human_TS_data$ci_high_95),
+#       ],
+#       aes(xmin = ci_low_95, xmax = ci_high_95),
+#       width = 0,
+#       color = "grey"
+#     ) +
+#     geom_point(aes(color = group, shape = group), size = 4) + ## position = "jitter", size = 1
+#     #geom_smooth(method = "lm", se = T)+
+#     ggrepel::geom_label_repel(
+#       aes(label = variant_name, color = variant_name), # fill = group,
+#       max.overlaps = max_overlaps,
+#       # text
+#       #fill = "grey",        # fill in the rectangle
+#       # segment.colour = "grey",# border + connecting line
+#
+#       size = 3
+#     ) +
+#     theme_classic() +
+#     #theme(legend.position = "none") +
+#     guides(color = "none", label = "none")
+#   labs(
+#     title = paste(
+#       expression(rho),
+#       "=",
+#       round(spearman_r, 2),
+#       ";",
+#       "p =",
+#       format(spearman_p, scientific = TRUE, digits = 2),
+#       "\n",
+#       "r",
+#       "=",
+#       round(pearson_r, 2),
+#       ";",
+#       "p =",
+#       format(pearson_p, scientific = TRUE, digits = 2)
+#     )
+#   )
+#
+#   return(
+#     result = list(
+#       pp_wo_smooth,
+#       human_TS_data,
+#       pearson_r,
+#       pearson_p,
+#       spearman_r,
+#       spearman_p
+#     )
+#   )
+# }
+# target_effect_forScatter <- target_effect[, .(
+#   variant_name,
+#   group,
+#   selection_intensity,
+#   ci_low_95,
+#   ci_high_95
+# )]
+#
+# mouse_raw_median_forScatter <- data.frame(
+#   tumorGrowth = tapply(tm_m$TM_M, tm_m$Genotype, median),
+#   ci_low_95_TMm = tapply(
+#     tm_m$TM_M,
+#     tm_m$Genotype,
+#     function(x) quantile(x, 0.025)
+#   ),
+#   ci_high_95_TMm = tapply(
+#     tm_m$TM_M,
+#     tm_m$Genotype,
+#     function(x) quantile(x, 0.975)
+#   )
+# )
+# mouse_raw_median_forScatter$variant_name <- rownames(
+#   mouse_raw_median_forScatter
+# )
+#
+# svg(
+#   file = "p_MicetTumorGrowth_Median_vs_CES_scatter.svg",
+#   height = 11,
+#   width = 8
+# )
+# p_scatter <- draw_scatter_forCES(
+#   target_effect_forScatter,
+#   mouse_raw_median_forScatter
+# )
+# p_scatter[[1]]
+# dev.off()
+#
+# ## calculate the Pearson and Spearman correlations separately for smoker and never-smoker ####
+#
+# compute_corr <- function(df, label) {
+#   pearson_corr <- cor.test(
+#     df$tumorGrowth,
+#     df$selection_intensity,
+#     method = "pearson"
+#   )
+#
+#   spearman_corr <- cor.test(
+#     df$tumorGrowth,
+#     df$selection_intensity,
+#     method = "spearman"
+#   )
+#
+#   data.frame(
+#     group = label,
+#     n = nrow(df),
+#     pearson_r = unname(pearson_corr$estimate),
+#     pearson_p = pearson_corr$p.value,
+#     spearman_r = unname(spearman_corr$estimate),
+#     spearman_p = spearman_corr$p.value
+#   )
+# }
+#
+# human_TS_data <- p_scatter[[2]]
+# corr_results <- rbind(
+#   compute_corr(
+#     subset(human_TS_data, group == "Smoker"),
+#     "Smoker"
+#   ),
+#   compute_corr(
+#     subset(human_TS_data, group == "Never-smoker"),
+#     "Never-smoker"
+#   ),
+#   compute_corr(
+#     human_TS_data,
+#     "NS_S"
+#   )
+# )
+#
+# corr_results
+#
+# ## for testing
+# cesa$coverage_ranges$exome$exome ## get the default exome covered region

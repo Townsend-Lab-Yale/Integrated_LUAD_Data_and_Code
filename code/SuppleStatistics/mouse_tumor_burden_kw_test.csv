@@ -1,0 +1,2 @@
+test,statistic,df,p_value,method
+Kruskal-Wallis rank-sum test,78.3533721341397,3,6.92134802207812e-17,Kruskal-Wallis rank sum test

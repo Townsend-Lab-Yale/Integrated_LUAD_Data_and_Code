@@ -1,0 +1,3 @@
+group,test,null_df,alternative_df,lrt_df,null_gamma,null_loglikelihood,alternative_loglikelihood,lrt_statistic,p_value
+Never-smoker,Omnibus LRT: one shared SSC vs four separate SSCs,1,4,3,199201.176829016,-610.443780390882,-467.722542708343,285.442475365078,1.40658812769775e-61
+Smoker,Omnibus LRT: one shared SSC vs four separate SSCs,1,4,3,36401.9416285527,-791.005083982294,-766.639591848977,48.730984266635,1.48832076767756e-10
