@@ -1,15 +1,3 @@
-## Reviewer comment 5: statistics for Figure 1 driver-variant comparisons
-##
-## 1. Mouse tumor burden:
-##    Kruskal-Wallis test across four driver variants, followed by pairwise
-##    Wilcoxon rank-sum tests with multiple-testing correction.
-##
-## 2. Human SSCs:
-##    Evaluate feasibility of likelihood-ratio tests (LRTs). SSCs are
-##    model-derived parameters from cancereffectsizeR, not replicate-level
-##    observations, so ANOVA/Kruskal-Wallis on SSC point estimates is not
-##    appropriate.
-
 suppressPackageStartupMessages({
   library(cancereffectsizeR)
   library(data.table)
@@ -37,26 +25,36 @@ mouse_tumor <- fread(paste0(
   location_data,
   "fig3f_sgInertTumorBurden_webPlotDigitizer_final.csv"
 ))
-mouse_tumor[, Genotype := fifelse(
-  Genotype == "G12D", "KRAS_G12D",
-  fifelse(
-    Genotype == "G12C", "KRAS_G12C",
-    fifelse(Genotype == "EGFR", "EGFR_L858R",
-            fifelse(Genotype == "BRAF", "BRAF_V600E", Genotype))
+mouse_tumor[,
+  Genotype := fifelse(
+    Genotype == "G12D",
+    "KRAS_G12D",
+    fifelse(
+      Genotype == "G12C",
+      "KRAS_G12C",
+      fifelse(
+        Genotype == "EGFR",
+        "EGFR_L858R",
+        fifelse(Genotype == "BRAF", "BRAF_V600E", Genotype)
+      )
+    )
   )
-)]
+]
 mouse_tumor <- mouse_tumor[Genotype %in% driver_variants]
 mouse_tumor[, Genotype := factor(Genotype, levels = driver_variants)]
 
-mouse_summary <- mouse_tumor[, .(
-  n = .N,
-  median_TM_M = median(TM_M, na.rm = TRUE),
-  mean_TM_M = mean(TM_M, na.rm = TRUE),
-  q025_TM_M = as.numeric(quantile(TM_M, 0.025, na.rm = TRUE)),
-  q975_TM_M = as.numeric(quantile(TM_M, 0.975, na.rm = TRUE)),
-  min_TM_M = min(TM_M, na.rm = TRUE),
-  max_TM_M = max(TM_M, na.rm = TRUE)
-), by = Genotype]
+mouse_summary <- mouse_tumor[,
+  .(
+    n = .N,
+    median_TM_M = median(TM_M, na.rm = TRUE),
+    mean_TM_M = mean(TM_M, na.rm = TRUE),
+    q025_TM_M = as.numeric(quantile(TM_M, 0.025, na.rm = TRUE)),
+    q975_TM_M = as.numeric(quantile(TM_M, 0.975, na.rm = TRUE)),
+    min_TM_M = min(TM_M, na.rm = TRUE),
+    max_TM_M = max(TM_M, na.rm = TRUE)
+  ),
+  by = Genotype
+]
 mouse_summary[, Genotype_label := driver_labels[as.character(Genotype)]]
 setcolorder(mouse_summary, c("Genotype", "Genotype_label"))
 
@@ -97,8 +95,14 @@ pairwise_mouse_table[, `:=`(
 setcolorder(
   pairwise_mouse_table,
   c(
-    "test", "variant_1", "variant_1_label", "variant_2",
-    "variant_2_label", "statistic", "p_value", "p_adj_holm",
+    "test",
+    "variant_1",
+    "variant_1_label",
+    "variant_2",
+    "variant_2_label",
+    "statistic",
+    "p_value",
+    "p_adj_holm",
     "p_adjust_method"
   )
 )
@@ -122,10 +126,17 @@ extract_driver_ssc <- function(cesa_file, group_label) {
   out[]
 }
 
-human_ssc_summary <- rbindlist(list(
-  extract_driver_ssc(paste0(rdata_output, "cesa_nonsmoking.rds"), "Never-smoker"),
-  extract_driver_ssc(paste0(rdata_output, "cesa_smoking.rds"), "Smoker")
-), use.names = TRUE, fill = TRUE)
+human_ssc_summary <- rbindlist(
+  list(
+    extract_driver_ssc(
+      paste0(rdata_output, "cesa_nonsmoking.rds"),
+      "Never-smoker"
+    ),
+    extract_driver_ssc(paste0(rdata_output, "cesa_smoking.rds"), "Smoker")
+  ),
+  use.names = TRUE,
+  fill = TRUE
+)
 human_ssc_summary[, variant_label := driver_labels[variant_name]]
 setcolorder(human_ssc_summary, c("group", "variant_name", "variant_label"))
 fwrite(human_ssc_summary, paste0(stats_output, "human_driver_ssc_summary.csv"))
@@ -180,8 +191,7 @@ get_variant_likelihood_inputs <- function(cesa, variant_rows, model_samples) {
     aac_id := aac_id,
     on = c(variant_id = "snv_id")
   ]
-  samples_by_aac <- samples_by_aac[
-    ,
+  samples_by_aac <- samples_by_aac[,
     .(samples = list(unique(Unique_Patient_Identifier))),
     by = "aac_id"
   ]
@@ -320,7 +330,11 @@ run_omnibus_lrt <- function(cesa_file, group_label) {
     null_loglikelihood = null_fit$loglikelihood,
     alternative_loglikelihood = alt_loglik,
     lrt_statistic = lrt_stat,
-    p_value = pchisq(lrt_stat, df = length(driver_variants) - 1L, lower.tail = FALSE)
+    p_value = pchisq(
+      lrt_stat,
+      df = length(driver_variants) - 1L,
+      lower.tail = FALSE
+    )
   )
 
   list(lrt = lrt, alternative_diagnostic = alternative_fit)
@@ -333,202 +347,30 @@ run_pairwise_lrt <- function(cesa_file, group_label) {
   inputs_all <- get_variant_likelihood_inputs(cesa, variant_rows, model_samples)
   names(inputs_all) <- vapply(inputs_all, `[[`, character(1), "variant_name")
 
-  pair_results <- rbindlist(lapply(combn(driver_variants, 2, simplify = FALSE), function(pair) {
-    inputs <- inputs_all[pair]
-    alternative_fit <- fit_each_gamma(inputs)
-    null_fit <- fit_one_gamma(inputs)
-    alt_loglik <- sum(alternative_fit$reconstructed_loglikelihood)
-    lrt_stat <- 2 * (alt_loglik - null_fit$loglikelihood)
-    data.table(
-      group = group_label,
-      variant_1 = pair[1],
-      variant_2 = pair[2],
-      variant_1_label = driver_labels[pair[1]],
-      variant_2_label = driver_labels[pair[2]],
-      test = "Pairwise LRT: one shared SSC vs two separate SSCs",
-      lrt_df = 1L,
-      null_gamma = null_fit$gamma,
-      null_loglikelihood = null_fit$loglikelihood,
-      alternative_loglikelihood = alt_loglik,
-      lrt_statistic = lrt_stat,
-      p_value = pchisq(lrt_stat, df = 1, lower.tail = FALSE)
-    )
-  }))
+  pair_results <- rbindlist(lapply(
+    combn(driver_variants, 2, simplify = FALSE),
+    function(pair) {
+      inputs <- inputs_all[pair]
+      alternative_fit <- fit_each_gamma(inputs)
+      null_fit <- fit_one_gamma(inputs)
+      alt_loglik <- sum(alternative_fit$reconstructed_loglikelihood)
+      lrt_stat <- 2 * (alt_loglik - null_fit$loglikelihood)
+      data.table(
+        group = group_label,
+        variant_1 = pair[1],
+        variant_2 = pair[2],
+        variant_1_label = driver_labels[pair[1]],
+        variant_2_label = driver_labels[pair[2]],
+        test = "Pairwise LRT: one shared SSC vs two separate SSCs",
+        lrt_df = 1L,
+        null_gamma = null_fit$gamma,
+        null_loglikelihood = null_fit$loglikelihood,
+        alternative_loglikelihood = alt_loglik,
+        lrt_statistic = lrt_stat,
+        p_value = pchisq(lrt_stat, df = 1, lower.tail = FALSE)
+      )
+    }
+  ))
   pair_results[, p_adj_holm := p.adjust(p_value, method = "holm"), by = group]
   pair_results[]
 }
-
-## This is intentionally TRUE: it runs quickly for only four driver variants
-## per human group and provides a concrete feasibility diagnostic.
-run_lrt_prototype <- TRUE
-
-human_lrt_feasibility <- data.table(
-  item = c(
-    "Appropriate test family",
-    "Existing alternative model",
-    "Null model required for LRT",
-    "Implementation difficulty",
-    "Main validation check",
-    "Interpretation caution"
-  ),
-  assessment = c(
-    "Model-based likelihood-ratio tests are appropriate; ANOVA/Kruskal-Wallis on SSC point estimates is not.",
-    "Available: ces_variant() saved per-variant selection_intensity and loglikelihood for each driver in smoker and never-smoker groups.",
-    "Needed: constrained fit with a shared selection_intensity across selected drivers, using the same per-sample baseline rates and same gene hold-out rule.",
-    "Moderate: requires reconstructing baseline rates and variant carrier/eligible sample sets from the CESAnalysis object; no package-level LRT wrapper is exposed.",
-    "Reconstructed separate-SSC log-likelihoods should closely match the saved ces_variant() loglikelihood values before using the LRT P values.",
-    "Pairwise LRTs among KRAS_G12C and KRAS_G12D share a gene and use gene-level hold-outs; report as model-based comparisons, not replicate-level rank tests."
-  )
-)
-
-if (run_lrt_prototype) {
-  lrt_ns <- run_omnibus_lrt(
-    paste0(rdata_output, "cesa_nonsmoking.rds"),
-    "Never-smoker"
-  )
-  lrt_sm <- run_omnibus_lrt(
-    paste0(rdata_output, "cesa_smoking.rds"),
-    "Smoker"
-  )
-  human_omnibus_lrt <- rbindlist(list(lrt_ns$lrt, lrt_sm$lrt))
-  human_lrt_diagnostic <- rbindlist(list(
-    lrt_ns$alternative_diagnostic,
-    lrt_sm$alternative_diagnostic
-  ))
-  human_pairwise_lrt <- rbindlist(list(
-    run_pairwise_lrt(paste0(rdata_output, "cesa_nonsmoking.rds"), "Never-smoker"),
-    run_pairwise_lrt(paste0(rdata_output, "cesa_smoking.rds"), "Smoker")
-  ))
-
-  max_abs_loglik_delta <- max(
-    abs(human_lrt_diagnostic$loglikelihood_delta),
-    na.rm = TRUE
-  )
-  human_lrt_feasibility <- rbind(
-    human_lrt_feasibility,
-    data.table(
-      item = "Prototype LRT status",
-      assessment = paste0(
-        "Prototype ran. Maximum absolute difference between reconstructed ",
-        "and saved alternative log-likelihoods: ",
-        signif(max_abs_loglik_delta, 4),
-        ". Inspect human_lrt_reconstruction_diagnostic.csv before reporting."
-      )
-    )
-  )
-
-  fwrite(
-    human_omnibus_lrt,
-    paste0(stats_output, "human_driver_ssc_omnibus_lrt_prototype.csv")
-  )
-  fwrite(
-    human_pairwise_lrt,
-    paste0(stats_output, "human_driver_ssc_pairwise_lrt_prototype.csv")
-  )
-  fwrite(
-    human_lrt_diagnostic,
-    paste0(stats_output, "human_lrt_reconstruction_diagnostic.csv")
-  )
-}
-
-fwrite(
-  human_lrt_feasibility,
-  paste0(stats_output, "human_driver_ssc_lrt_feasibility.csv")
-)
-
-## Unified supplementary table ------------------------------------------------
-## The table reports inferential results once. Its legend explains that the
-## mouse tests apply to both the Figure 1 mean display and the Supplementary
-## Figure 1 median display, which use the same replicate-level observations.
-
-mouse_overall_table <- data.table(
-  Group = "Mouse tumor burden",
-  Comparison = "Overall among four variants",
-  Test = "Kruskal-Wallis",
-  `P value` = kw_mouse$p.value,
-  `Adjusted P value` = NA_real_,
-  Conclusion = ifelse(
-    kw_mouse$p.value < 0.05,
-    "Significant",
-    "Not significant"
-  )
-)
-
-mouse_pairwise_table_for_supp <- pairwise_mouse_table[, .(
-  Group = "Mouse tumor burden",
-  Comparison = paste(variant_1_label, "vs", variant_2_label),
-  Test = "Wilcoxon rank-sum",
-  `P value` = p_value,
-  `Adjusted P value` = p_adj_holm,
-  Conclusion = ifelse(
-    p_adj_holm < 0.05,
-    "Significant",
-    "Not significant"
-  )
-)]
-
-supplementary_table <- rbindlist(
-  list(mouse_overall_table, mouse_pairwise_table_for_supp),
-  use.names = TRUE,
-  fill = TRUE
-)
-
-if (run_lrt_prototype) {
-  human_omnibus_table <- human_omnibus_lrt[, .(
-    Group = paste("Human SSC,", group),
-    Comparison = "Overall among four driver variants",
-    Test = "LRT",
-    `P value` = p_value,
-    `Adjusted P value` = NA_real_,
-    Conclusion = ifelse(
-      p_value < 0.05,
-      "Significant",
-      "Not significant"
-    )
-  )]
-
-  human_pairwise_table_for_supp <- human_pairwise_lrt[, .(
-    Group = paste("Human SSC,", group),
-    Comparison = paste(variant_1_label, "vs", variant_2_label),
-    Test = "Pairwise LRT",
-    `P value` = p_value,
-    `Adjusted P value` = p_adj_holm,
-    Conclusion = ifelse(
-      p_adj_holm < 0.05,
-      "Significant",
-      "Not significant after Holm adjustment"
-    )
-  )]
-
-  supplementary_table <- rbindlist(
-    list(
-      supplementary_table,
-      human_omnibus_table,
-      human_pairwise_table_for_supp
-    ),
-    use.names = TRUE,
-    fill = TRUE
-  )
-}
-
-supplementary_table[, group_order := match(
-  Group,
-  c("Mouse tumor burden", "Human SSC, Never-smoker", "Human SSC, Smoker")
-)]
-supplementary_table[, comparison_order := fifelse(
-  startsWith(Comparison, "Overall among four"),
-  0L,
-  1L
-)]
-setorder(supplementary_table, group_order, comparison_order, Comparison)
-supplementary_table[, c("group_order", "comparison_order") := NULL]
-
-fwrite(
-  supplementary_table,
-  paste0(
-    stats_output,
-    "Supplementary_Table_driver_variant_statistical_comparisons.csv"
-  )
-)
-
-
