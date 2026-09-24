@@ -130,51 +130,7 @@ for (i in 1:length(oncogene_variants)) {
 }
 epi_final_pan[, data_type := "Pan"]
 epi_final_pan[nAB == "0"]
-# variant_A     variant_B   ces_A0    ces_B0 ces_A_on_B ces_B_on_A p_A_change p_B_change  p_epistasis expected_nAB_epistasis expected_nAB_null AB_epistatic_ratio ces_A_null ces_B_null   nA0   nB0   nAB   n00
-# <char>        <char>    <num>     <num>      <num>      <num>      <num>      <num>        <num>                  <num>             <num>              <num>      <num>      <num> <int> <int> <int> <int>
-#   1:      BRAF           NF1 26603.35  32.33761   942.5758      0.001 0.02766277 0.03177044 0.0007687001           1.287935e-01         6.8484275       1.880629e-02   25620.12   32.09869    99   497     0  6586
-# 2:      BRAF         CMTR2 19259.62 686.60999     0.0010      0.001 0.78046350 0.81724238 0.6378346428           3.164870e-07         0.4079435       7.758108e-07   18943.23  683.12476    15    40     0  1414
-# 3:      BRAF          MSH2 25391.23  50.55111     0.0010      0.001 0.50264115 0.50864243 0.2556700461           1.352591e-05         1.3399209       1.009456e-05   25214.86   50.20612    99    99     0  7099
-# 4:      BRAF CDKN2A.p14arf 25909.93  10.29680     0.0010      0.001 0.81158911 0.81141951 0.6585327624           2.065599e-05         0.4200404       4.917621e-05   25853.56   10.22410   120    30     0  8482
-# 5:      EGFR CDKN2A.p14arf 94217.87  10.64417   992.5697      0.001 0.28557740 0.30321398 0.0854395625           1.325079e-02         2.3573431       5.621071e-03   94037.78   10.22410   676    30     0  7926
-# n_total ci_low_95_ces_A0 ci_high_95_ces_A0 ci_low_95_ces_B0 ci_high_95_ces_B0 ci_low_95_ces_A_on_B ci_high_95_ces_A_on_B ci_low_95_ces_B_on_A ci_high_95_ces_B_on_A                      run_type data_type
-# <int>            <num>             <num>            <num>             <num>                <num>                 <num>                <num>                 <num>                        <char>    <char>
-#   1:    7182         21702.43          32195.92        29.574408          35.26279                   NA              14406.74                   NA              17.21931             BRAF_V600E_vs_NF1       Pan
-# 2:    1469         11082.92          30715.43       495.212276         921.93211                   NA             149211.93                   NA            6658.46458           BRAF_V600E_vs_CMTR2       Pan
-# 3:    7297         20712.42          30726.71        41.236169          61.17357                   NA              70804.68                   NA             143.43837            BRAF_V600E_vs_MSH2       Pan
-# 4:    8632         21537.04          30812.98         7.036941          14.43134                   NA             240374.58                   NA              94.51096 BRAF_V600E_vs_CDKN2A.p16INK4a       Pan
-# 5:    8632         87290.72         101502.33         7.275141          14.91995                   NA             144266.25                   NA              16.60463 EGFR_L858R_vs_CDKN2A.p16INK4a       Pan
-epi_final_pan[nAB == "1"]
-# variant_A       variant_B    ces_A0    ces_B0 ces_A_on_B  ces_B_on_A p_A_change p_B_change p_epistasis expected_nAB_epistasis expected_nAB_null AB_epistatic_ratio ces_A_null ces_B_null   nA0   nB0   nAB   n00
-# <char>          <char>     <num>     <num>      <num>       <num>      <num>      <num>       <num>                  <num>             <num>              <num>      <num>      <num> <int> <int> <int> <int>
-#   1:      KRAS           FBXW7  88101.18  36.53048  1425.7583   13.147406  0.5132914  0.5153277 0.073741042              0.9973779         5.1054818          0.1953543   87474.99   35.80307   367    83     1  5601
-# 2:      KRAS           CMTR2  41281.53 676.33268  1662.7592 1134.966128  1.0000000  1.0000000 1.000000000              0.9785996         1.1444596          0.8550757   40864.47  683.12476    43    39     1  1386
-# 3:      KRAS   CDKN2A.p14arf  50900.64  10.63118   967.0665    4.736560  0.7316014  0.6946555 0.175569863              1.0029539         4.0430088          0.2480712   50808.86   10.22410  1154    29     1  7448
-# 4:      BRAF           FBXW7  26099.24  35.63838  1107.0788   59.688208  1.0000000  1.0000000 0.996242250              0.9999047         1.1653620          0.8580207   25921.65   35.80307    83    83     1  5885
-# 5:      BRAF           RNF43  23530.72  37.58202  1091.9836   82.831535  1.0000000  1.0000000 0.997428356              0.9693933         0.8668666          1.1182727   23407.52   37.87366    81    69     1  6354
-# 6:      BRAF           RBM10  23935.27  99.75628  1599.7886   30.649553  0.4922832  0.5101819 0.069841803              0.9977945         5.0655143          0.1969779   23025.34   99.30098    64   409     1  4763
-# 7:      BRAF             NF2  25318.74  99.57811  1036.7676  226.877708  1.0000000  1.0000000 0.999267883              0.9689917         0.8417035          1.1512269   25214.86  100.45819    98    62     1  7136
-# 8:      BRAF           PALB2  25439.69  52.44701  1094.1697   58.618293  0.9486069  0.9955446 0.792701939              0.9922611         1.6977387          0.5844604   25214.86   52.48703    98   125     1  7073
-# 9:      BRAF   CDKN2A.p14arf  25548.47  24.71247  1190.5917   17.497663  0.9720338  0.9594761 0.523277189              0.9929644         2.5909126          0.3832489   25225.27   24.66171    98   190     1  7005
-# 10:      BRAF CDKN2A.p16INK4a  25487.29  30.54260  1237.0489   17.098397  0.8531336  0.8658082 0.331874213              1.0018653         3.2251653          0.3106400   25083.75   30.44990    98   238     1  6998
-# 11:      EGFR            TSC1 100732.01  46.43883   963.2401    9.991092  0.1771249  0.1501405 0.004462914              0.9847883         8.2797966          0.1189387  100031.09   44.86841   608    99     1  6613
-# 12:      EGFR           CMTR2 111603.89 698.22283  2872.6316  362.949784  0.9197585  0.8022751 0.298766747              1.0445320         3.6405988          0.2869121  110259.70  683.12476   137    39     1  1292
-# 13:      EGFR             NF2 100825.81 103.39192  1044.7693   35.749803  0.4955304  0.4728220 0.061964334              0.9769771         5.2286293          0.1868515  100372.22  100.45819   608    62     1  6626
-# n_total ci_low_95_ces_A0 ci_high_95_ces_A0 ci_low_95_ces_B0 ci_high_95_ces_B0 ci_low_95_ces_A_on_B ci_high_95_ces_A_on_B ci_low_95_ces_B_on_A ci_high_95_ces_B_on_A                      run_type data_type
-# <int>            <num>             <num>            <num>             <num>                <num>                 <num>                <num>                 <num>                        <char>    <char>
-#   1:    6052         79402.01          97415.81        29.224206          44.96274                   NA             114678.18           0.19262011              59.98923            KRAS_G12D_vs_FBXW7       Pan
-# 2:    1469         30247.33          54716.18       485.664846         911.39152                   NA             322990.90          38.85966943            5161.56752            KRAS_G12D_vs_CMTR2       Pan
-# 3:    8632         48018.48          53896.11         7.216165          14.98297                   NA              85720.16           0.07991724              21.54929  KRAS_G12C_vs_CDKN2A.p16INK4a       Pan
-# 4:    6052         20901.49          32078.88        28.508312          43.86088                   NA             155833.59           1.97444457             269.81534           BRAF_V600E_vs_FBXW7       Pan
-# 5:    6505         18795.70          28996.99        29.398152          47.16110                   NA             182457.13           3.07584684             373.56039           BRAF_V600E_vs_RNF43       Pan
-# 6:    5237         18565.50          30252.68        90.394467         109.74032                   NA              31101.05                   NA             159.14171           BRAF_V600E_vs_RBM10       Pan
-# 7:    7297         20652.43          30639.84        76.803929         126.46269                   NA             205603.68           9.08036918            1018.84168             BRAF_V600E_vs_NF2       Pan
-# 8:    7297         20751.25          30788.89        43.780195          62.18389                   NA              93261.62           1.21047797             267.14579           BRAF_V600E_vs_PALB2       Pan
-# 9:    7294         20834.33          30915.15        21.361351          28.39277                   NA              67852.39                   NA              82.00298   BRAF_V600E_vs_CDKN2A.p14arf       Pan
-# 10:    7335         20787.24          30847.42        26.824589          34.58906                   NA              53042.08                   NA              80.79118 BRAF_V600E_vs_CDKN2A.p16INK4a       Pan
-# 11:    7321         92938.72         108949.62        37.881183          56.19728                   NA              82984.66           0.15138992              45.54734            EGFR_L858R_vs_TSC1       Pan
-# 12:    1469         93986.25         131292.33       501.363990         940.88356                   NA             233596.43           3.75250371            1666.20235           EGFR_L858R_vs_CMTR2       Pan
-# 13:    7297         93025.50         109050.70        79.744728         131.30655                   NA             127446.59           1.02945323             161.20324             EGFR_L858R_vs_NF2       Pan
+
 epi_data <- rbind(
   epi_final_smoking_wP[, data_type := "Smo"],
   epi_final_nonsmoking_wP[, data_type := "nonSmo"]
@@ -557,144 +513,7 @@ p_G12C +
 dev.off()
 
 
-# ## plot significant; use bar instead of point; combine two together ####
-# epi_signDiff <- rbind(
-#   #epi_EGFR_L858R[variant_B %in% c("TP53")],
-#   epi_KRAS_G12C[variant_B %in% c("NF1")]
-# )
-# variant_label_signDiff <- epi_signDiff[,
-#   .(max_y = max(ci_high_95_ces_B_on_A)),
-#   by = variant_B
-# ]
-# # p_signDiff_signifi_bar <- ggplot(
-# #   data = epi_signDiff,
-# #   aes(x = variant_B, y = ces_B_on_A, fill = data_type)
-# # ) +
-# #   ylab("Cancer effect size") +
-# #   geom_bar(
-# #     stat = "identity",
-# #     color = "black",
-# #     position = position_dodge(width = 0.9)
-# #   ) + ## color = errorBarColor,shape = 21, size =6
-# #   geom_errorbar(
-# #     aes(ymin = ci_low_95_ces_B_on_A_forplot, ymax = ci_high_95_ces_B_on_A),
-# #     width = 0.3,
-# #     na.rm = T,
-# #     linewidth = 0.6,
-# #     position = position_dodge(width = 0.9)
-# #   ) + ## , color = errorBarColor
-# #   # Add variant_name labels above the bars
-# #   geom_text(
-# #     data = variant_label_signDiff,
-# #     aes(x = variant_B, y = max(variant_label$max_y) * 3, label = variant_B),
-# #     inherit.aes = F,
-# #     vjust = 0,
-# #     size = 5,
-# #     fontface = "bold"
-# #   ) +
-# #   scale_x_discrete(labels = rep(c("Never-smoker", "Smoker"), length.out = 2)) +
-# #   scale_fill_manual(values = c("Smo" = "#D2B48C", "nonSmo" = "pink")) + ## ,"Gray" = "gray" ## "All" = "black", ## brown looks like red,so use light brown hex code #D2B48C instead
-# #   scale_y_continuous(
-# #     trans = scales::pseudo_log_trans(base = 10),
-# #     breaks = c(0.01, 1, 100, 10000, 1000000),
-# #     labels = scales::label_comma(accuracy = 1)
-# #   ) +
-# #   theme_classic() + ##theme_classic()
-# #   theme(
-# #     legend.direction = "horizontal",
-# #     legend.position = "bottom",
-# #     legend.box = "vertical",
-# #     legend.text = element_text(size = 18),
-# #     legend.title = element_text(size = 18),
-# #     axis.text.x = element_blank(),
-# #     axis.text.y = element_text(size = 18, face = "bold"),
-# #     axis.title.y = element_text(size = 18, face = "bold"),
-# #     axis.title.x = element_blank()
-# #   ) +
-# #   guides(fill = F)
-# #
-# # svg(file = "CES_select_VariantGeneLevel.svg", height = 10.5, width = 5)
-# # p_signDiff_signifi_bar
-# # dev.off()
-#
-# ## use bar instead of point; combine two together' do a square-root transformation ####
-# epi_signDiff[,
-#   ci_low_95_ces_B_on_A_forplot_v2 := ifelse(
-#     is.na(ci_low_95_ces_B_on_A),
-#     0.001,
-#     ci_low_95_ces_B_on_A
-#   )
-# ]
-# min(epi_signDiff[, ci_low_95_ces_B_on_A_forplot_v2]) ## 19.2795
-# max(epi_signDiff[, ci_high_95_ces_B_on_A]) ## 3212.489
-# p_signDiff_signifi_bar <- ggplot(
-#   data = epi_signDiff,
-#   aes(x = variant_B, y = ces_B_on_A, fill = data_type)
-# ) +
-#   ylab("Cancer effect size") +
-#   geom_bar(
-#     stat = "identity",
-#     color = "black",
-#     position = position_dodge(width = 0.9)
-#   ) + ## color = errorBarColor,shape = 21, size =6
-#   geom_errorbar(
-#     aes(ymin = ci_low_95_ces_B_on_A_forplot_v2, ymax = ci_high_95_ces_B_on_A),
-#     width = 0.3,
-#     na.rm = T,
-#     linewidth = 0.6,
-#     position = position_dodge(width = 0.9)
-#   ) + ## , color = errorBarColor
-#   # Add variant_name labels above the bars
-#   geom_text(
-#     data = variant_label_signDiff,
-#     aes(x = variant_B, y = max(variant_label$max_y) * 1.4, label = variant_B),
-#     inherit.aes = F,
-#     vjust = 0,
-#     size = 5,
-#     fontface = "bold"
-#   ) +
-#   scale_x_discrete(labels = rep(c("Never-smoker", "Smoker"), length.out = 2)) +
-#   scale_fill_manual(values = c("Smo" = "#D2B48C", "nonSmo" = "pink")) + ## ,"Gray" = "gray" ## "All" = "black", ## brown looks like red,so use light brown hex code #D2B48C instead
-#   #scale_color_manual(values = c("Gray" = "gray","Black" = "black"))+
-#   # scale_y_log10(labels = function(x) format(x, big.mark = ",", scientific = F))+
-#   # scale_x_discrete(labels = c("KRAS G12C Never-smoker","KRAS G12C Smoker"))+ ## change the x-axis label
-#   scale_y_continuous(
-#     trans = "sqrt",
-#     breaks = c(
-#       5000,
-#       10000,
-#       20000,
-#       50000,
-#       100000,
-#       200000,
-#       400000,
-#       800000,
-#       1200000
-#     ),
-#     labels = scales::label_comma(accuracy = 1),
-#     expand = expansion(mult = c(0.05, 0.05))
-#   ) +
-#   theme_classic() + ##theme_classic()
-#   theme(
-#     legend.direction = "horizontal",
-#     legend.position = "bottom",
-#     legend.box = "vertical",
-#     legend.text = element_text(size = 18),
-#     legend.title = element_text(size = 18),
-#     axis.text.x = element_blank(), #element_text( size=18,face = "bold",angle = 30, hjust = 1), ## , angle = 30
-#     axis.text.y = element_text(size = 18, face = "bold"),
-#     axis.title.y = element_text(size = 18, face = "bold"),
-#     axis.title.x = element_blank()
-#   ) +
-#   guides(fill = F)
-#
-# svg(
-#   file = "CES_select_VariantGeneLevel_siginifi_byNonOverlapping_signDiff_onlyNS_S_bar_v4.svg",
-#   height = 10.5,
-#   width = 5
-# ) ## 6inch = 1800 pixels. 1278 pixels, 1000
-# p_signDiff_signifi_bar
-# dev.off()
+
 
 # scatter plot: compare relative tumor size/number with CES_B_on_A-----
 format_p_math <- function(p) {
@@ -871,28 +690,7 @@ draw_scatter <- function(
       axis.title.y = element_text(size = 18), #, face = "bold"
       axis.title.x = element_text(size = 18)
     ) + # , face = "bold"
-    # labs(
-    #   # title = paste(
-    #   #   expression(rho),
-    #   #   ":",
-    #   #   round(spearman_r, 2),
-    #   #   ";",
-    #   #   "P =",
-    #   #   format(spearman_p, scientific = TRUE, digits = 2),
-    #   #   "\n",
-    #   #   "Pearson's",
-    #   #   ":",
-    #   #   round(pearson_r, 2),
-    #   #   ";",
-    #   #   "P =",
-    #   #   format(pearson_p, scientific = F)
-    #   # )
-    #   title = bquote(
-    #     atop(
-    #     "Spearman's " *rho * ": " * .(round(spearman_r, 2)) * "; " * italic(P) * " = " *.(format(spearman_p, digits = 3)),
-    #       "Pearson's " * italic(r) * ":" * .(round(pearson_r, 2)) * "; " * italic(P) * " = " * .(format(pearson_p, digits = 3)))
-    #     )
-    # )+
+    
     annotate(
       "text",
       x = label_x,
@@ -1500,6 +1298,4 @@ jpeg(
   plot_annotation(tag_levels = waiver())
 dev.off()
 
-# # check the underlying mutation rate of CMTR2, MSH2, NF1
-# head(cesa$gene_rates)
-# cesa$gene_rates[gene %in% c("CMTR2", "MSH2", "NF1")]
+
