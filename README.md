@@ -5,56 +5,14 @@ effect size estimation for somatic variants, (2) variant × tumor-suppressor-gen
 epistasis testing, and (3) comparison of human variant selection strength with
 tumor burden in genetically engineered mouse models (GEMMs).
 
-## Repository Structure
-
-```
-Integrated_LUAD_Data_and_Code/
-├── data/                          # raw per-source inputs (1.1-1.3)
-│   ├── bed_files/                 # targeted-panel capture intervals
-│   ├── gene_panels/                # gene-level panel membership lists
-│   ├── genie_9/                   # AACR Project GENIE v9.0.0 (targeted)
-│   ├── luad_broad/                # Broad Institute (WES/WGS)
-│   ├── luad_cptac_2020/           # CPTAC-LUAD (WES)
-│   ├── luad_fm-ad/                # Foundation Medicine Adult Cancer Dataset (targeted)
-│   ├── luad_mskcc_2015/           # MSKCC 2015 (WES)
-│   ├── luad_oncosg_2020/          # OncoSG (WES)
-│   ├── luad_tcga/                 # TCGA-LUAD (WES)
-│   ├── luad_tsp/                  # Tumor Sequencing Project (targeted)
-│   ├── lung_msk_2017/             # MSKCC 2017 (targeted)
-│   ├── lung_nci_2022/             # NCI Sherlock-Lung (WGS)
-│   ├── nsclc_pd1_msk_2018/        # MSKCC anti-PD-(L)1 cohort (targeted)
-│   ├── nsclc_tracerx_2017/        # TRACERx (WES)
-│   ├── yale_luad/                 # Yale LUAD cohort (WES)
-│   ├── hg38ToHg19.over.chain      # UCSC liftOver chain file
-│   ├── genes_list.txt             # driver genes analyzed in the manuscript
-│   └── *_final.csv                # digitized mouse GEMM tumor-burden data (1.3)
-├── integrated_data/               # merged/harmonized datasets built from data/ (1.4)
-├── code/
-│   ├── 01_CES_variants_calculation_and_plot.R
-│   ├── 02_epistasis_variant_TSG.R
-│   ├── 03_mouseStats_humanSCC_stat.R
-│   └── R_data/                    # precomputed R objects (1.5)
-├── LICENSE.txt                    # GNU GPL v3 (code)
-└── README.md
-```
-
 ## 1. Data
 
 ### 1.1 Cohort origin and sequencing type
 
-The integrated dataset merges 13 LUAD cohorts (WGS, WES, and targeted/panel
-sequencing), downloaded from cBioPortal datahub or the NCI Genomic Data
-Commons, plus the Yale cohort from institutional records. Each `data/<folder>/`
-holds that cohort's sample-level clinical file exactly as downloaded
-(`data_clinical_sample.txt`, cBioPortal format, or `clinical.tsv`, GDC format).
-MAF data for most cohorts are pulled programmatically from the same source
-repositories rather than stored here; the Yale MAF file is included directly
-(`data/yale_luad/data_mutations_extended.txt`) since it isn't otherwise public.
-
-Sample counts below are the analytic counts from Supplementary Table 1 of the
-companion short communication (Liu & Townsend), which uses this same integrated
-dataset; raw per-source record counts in this repo can be ≥ these figures since
-QC filters are applied downstream in `code/`.
+The integrated dataset merges LUAD cohorts spanning whole-genome (WGS),
+whole-exome (WES), and targeted/panel sequencing, downloaded from cBioPortal
+datahub or the NCI Genomic Data Commons, plus the Yale cohort from
+institutional records.
 
 | Folder | `Source` code | Sequencing | Study | Institution/project | *n* |
 |---|---|---|---|---|---|
@@ -74,7 +32,7 @@ QC filters are applied downstream in `code/`.
 
 ¹ TSP is merged into `integrated_data/` (`Source == "TSP"`) but excluded from
 the 9,230-sample analytic cohort above (insufficient smoking-history
-annotation); it can be included or excluded per-analysis in `code/`.
+annotation)
 
 **References:**
 [G1] AACR Project GENIE Consortium. *Cancer Discov.* 2017;7(8):818-831.
@@ -91,10 +49,6 @@ annotation); it can be included or excluded per-analysis in `code/`.
 [G12] Rizvi NA et al. *Science.* 2015;348(6230):124-128.
 [G13] Ding L et al. *Nature.* 2008;455(7216):1069-1075.
 
-Files reproduced from cBioPortal/GDC/AACR Project GENIE retain their original
-sources' terms of use — see each source's data-use policy (e.g.
-[AACR Project GENIE data guide](https://www.aacr.org/professionals/research/aacr-project-genie/data-access-and-use/))
-before reuse beyond this study.
 
 ### 1.2 Supporting reference files (`data/`)
 
@@ -111,22 +65,9 @@ before reuse beyond this study.
 | `hg38ToHg19.over.chain` | UCSC liftOver chain | GRCh38→hg19 conversion for `TCGA`/`FM-AD` (the only two sources on GRCh38). |
 | `genes_list.txt` | gene list | Driver genes analyzed in the manuscript. |
 
-### 1.3 Mouse GEMM comparative data (`data/*_final.csv`)
+### 1.3 Integrated / merged datasets (`integrated_data/`)
 
-Tumor-burden measurements from a GEMM system, digitized from a published figure
-with [WebPlotDigitizer](https://automeris.io/WebPlotDigitizer/), used for the
-human-vs-mouse "Comparative framework" analysis in `code/`.
-
-**`[CITATION NEEDED]`** — source publication/figure for this GEMM data.
-
-| File(s) | Columns |
-|---|---|
-| `fig3f_sgInertTumorBurden_webPlotDigitizer_final.csv` | `TM_M` — tumor-burden metric (units per source figure y-axis). `Genotype` — `G12D`/`G12C`/`EGFR`/`BRAF`, recoded in code to `KRAS_G12D`/`KRAS_G12C`/`EGFR_L858R`/`BRAF_V600E`. |
-| `{BRAF_V600E,EGFR_L858R,G12C,G12D}_data_tumorNumber_final.csv`, `..._tumorSize_final.csv` | `TSG` — co-inactivated tumor-suppressor gene (e.g. `PTEN`, `STK11`). `RelativeTumor_95` — relative tumor number/size, normalized to the inert/control genotype. `CI_low_tumor`, `CI_high_tumor` — 95% CI bounds (blank if not in source figure). `Variants` — driver genotype of the GEMM arm. |
-
-### 1.4 Integrated / merged datasets (`integrated_data/`)
-
-Built by harmonizing the 13 sources into one sample table and one mutation
+Built by harmonizing the sources into one sample table and one mutation
 table; direct inputs to `code/01_CES_variants_calculation_and_plot.R`. All
 files are comma-separated; the unlabeled first column is a row index from the
 merge and can be ignored.
@@ -181,30 +122,35 @@ from `merged_luad_clinical.txt` by `Sample ID`.
 |---|---|
 | `Unique_Patient_Identifier` | Sample ID. |
 | `coverage` | `genome` / `exome` / `targeted`. |
-| `covered_regions` | Covered-region reference set for mutation-rate correction (matches a file in `data/bed_files/` or `data/gene_panels/`). |
+| `covered_regions` | Covered-region reference set for mutation-rate correction. |
 | `sig_analysis_grp` | Internal batch index for mutational-signature analysis. |
-| `maf_source` | Fine-grained assay/panel ID (finer than `Source`, e.g. `MSK-IMPACT468`, `Broad_WES`). |
+| `maf_source` | Fine-grained assay/panel ID. |
+
+### 1.4 Mouse GEMM comparative data (`data/*_final.csv`)
+
+Tumor-burden measurements from a GEMM system, digitized from a published figure
+with [WebPlotDigitizer](https://automeris.io/WebPlotDigitizer/), used for the
+human-vs-mouse "Comparative framework" analysis in `code/`.
+
+Source: Blair LM, Juan JM, Sebastian L, et al. Oncogenic context shapes the
+fitness landscape of tumor suppression. *Nat Commun.* 2023;14:6422
+
+
 
 ### 1.5 Precomputed R objects (`code/R_data/`)
 
-Checkpoints saved so downstream steps and the Demo don't require recomputing
-from raw MAF data.
-
-| File | Contents |
-|---|---|
-| `load_maf_cesa_WES_TGS_WGS.rds` | `CESAnalysis` object after loading/QC-filtering all 13 cohorts (pre-effect-size checkpoint). |
-| `cesa_smoking.rds`, `cesa_nonsmoking.rds` | `CESAnalysis` objects after effect-size estimation, smoker / never-smoker subsets. |
-| `epistasis_variant_TSG_output.Rdata` | Output of the variant × TSG epistasis analysis (`02_epistasis_variant_TSG.R`). |
-| `gencode.v38lift37.basic.annotation.gtf.Rdata` | GENCODE v38lift37 (GRCh37) gene annotation, pre-parsed. |
+Checkpoints so downstream steps don't require recomputing from raw MAF data:
+`load_maf_cesa_WES_TGS_WGS.rds` (loaded/QC-filtered `CESAnalysis`, all
+cohorts), `cesa_smoking.rds` / `cesa_nonsmoking.rds` (post effect-size
+estimation, by smoking status), `epistasis_variant_TSG_output.Rdata` (output of
+`02_epistasis_variant_TSG.R`), `gencode.v38lift37.basic.annotation.gtf.Rdata`
+(pre-parsed GENCODE v38lift37/GRCh37 gene annotation).
 
 ## 2. Code
 
-### System Requirements
-
-Tested on macOS, R 4.3.0. ≥16 GB RAM recommended for loading the full 13-cohort
-MAF set.
-
 ### Installation
+
+Tested on macOS, R 4.3.0.
 
 ```r
 install.packages(c('ggplot2', 'data.table', 'dplyr', 'rtracklayer', 'stringr', 'ggpubr', 'patchwork'))
@@ -218,50 +164,17 @@ Run in order from within `code/` (scripts use relative paths `../data/`,
 `../integrated_data/`):
 
 1. **`01_CES_variants_calculation_and_plot.R`** — loads/QC-filters MAF data for
-   all 13 cohorts, lifts over `TCGA`/`FM-AD` to hg19, estimates cancer effect
+   all cohorts, lifts over `TCGA`/`FM-AD` to hg19, estimates cancer effect
    sizes (smokers vs. never-smokers), compares to mouse GEMM tumor burden, and
    generates figures.
 2. **`02_epistasis_variant_TSG.R`** — tests variant × TSG epistasis and
-   generates the human-vs-mouse epistasis figures (`p_MiceTumorSize_vs_epi.*`,
-   `p_MicetumorNumber_vs_epi.*`).
+   generates the human-vs-mouse epistasis figures.
 3. **`03_mouseStats_humanSCC_stat.R`** — mouse tumor-burden summary statistics
    by genotype, written to `code/SuppleStatistics/`.
-
-Further annotations are in comments within each script.
-
-### Demo
-
-To reproduce epistasis results without rerunning the full pipeline:
-
-```r
-load("R_data/epistasis_variant_TSG_output.Rdata")
-```
-
-This is the expected output of `02_epistasis_variant_TSG.R`. Running
-`01_CES_variants_calculation_and_plot.R` end-to-end regenerates
-`R_data/load_maf_cesa_WES_TGS_WGS.rds`, `cesa_smoking.rds`, and
-`cesa_nonsmoking.rds`.
-
-### Outputs
-
-| File(s) | Produced by | Contents |
-|---|---|---|
-| `p_MicetTumorGrowth_Mean_vs_CES_scaled.*`, `p_MicetTumorGrowth_Median_vs_CES_scaled.*` | `01_CES_variants_calculation_and_plot.R` | Human effect-size vs. mouse tumor-growth comparison plots. |
-| `p_MiceTumorSize_vs_epi.*`, `p_MicetumorNumber_vs_epi.*` | `02_epistasis_variant_TSG.R` | Human epistasis vs. mouse tumor size/number plots. |
-| `SuppleStatistics/` | `03_mouseStats_humanSCC_stat.R` | Mouse tumor-burden summary statistics by genotype. |
 
 ## 3. License
 
 - **Code** (`code/*.R`): [GNU GPL v3.0](LICENSE.txt).
 - **Data**: third-party files (Section 1.1) retain their original source's
-  license/terms (cBioPortal, NCI GDC, or AACR Project GENIE). Mouse GEMM data
-  (Section 1.3) are reproduced from a published figure; citation to be added.
+  license/terms (cBioPortal, NCI GDC, or AACR Project GENIE). 
 
-## 4. How to Cite
-
-`[FULL CITATION TO BE ADDED]`
-
-## Contact
-
-Open a GitHub Issue, or contact the corresponding author of the associated
-manuscript.
